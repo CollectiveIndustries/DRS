@@ -94,7 +94,7 @@ vinagre
 
 # possible application/libraries
 #libblkid-dev
-bc # Precition calculator
+bc # precision calculator
 EOF
 
 # Setup some aliases to add defualt options or short commands here
