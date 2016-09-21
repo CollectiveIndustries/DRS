@@ -69,12 +69,16 @@ cat <<EOF > kali-config/variant-gnome/package-lists/cw.list.chroot
 gddrescue
 ddrescueview
 
+# Bare metal backup / Forensics Imaging
+clonzilla
+
 # Drive testing
 gsmartcontrol
 
 # Resource usage
 htop
 gdmap
+ncdu
 
 # Stress Testing
 stress
@@ -128,10 +132,18 @@ alias ddrescue='clear; ddrescue -dfvO'
 EOF
 
 # Case insensitive Regular Expression matching for Windows names >..<
+# Ignores hibernation file, Pagefile, temporary files, temp internet files, HitmanPro, Windows Prefetch, and cookies.
 cat <<EOF >kali-config/common/includes.chroot/etc/rsync_exclude.conf
 [Hh][Ii][Bb][Ee][Rr]Ff][Ii][Ll].[Ss][Yy][Ss]
 [Pp][Aa][Gg][Ee][Ff][Ii][Ll][Ee].[Ss][Yy][Ss]
 [Ww][Ii][Nn][Ss][Xx][Ss]/*
+[Oo][Ll][Dd] [Ff][Ii][Rr][Ee][Ff][Oo][Xx] [Dd][Aa][Tt][Aa]
+ProgramData/HitmanPro
+temp
+*.[Tt][Mm][Pp]
+cookies
+temporary internet files
+windows/prefetch
 EOF
 
 cat <<EOF >kali-config/common/includes.chroot/root/.selected_editor
