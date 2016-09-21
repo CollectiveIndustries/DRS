@@ -1,0 +1,57 @@
+Load the necessary registry hives:
+
+    in Registry Editor (regedit), select either HKEY_LOCAL_MACHINE or HKEY_USERS, then click File → Load Hive, open the hive file, and input a temporary name for it;
+
+    in command line, use reg load HKLM\temp-name path-to-hive
+    or reg load HKU\temp‑name path-to-hive.
+
+The hive files are located in:
+
+    most of HKEY_LOCAL_MACHINE corresponds to files in %SystemRoot%\system32\config:
+        HKLM\SAM – file SAM
+        HKLM\SECURITY – file SECURITY
+        HKLM\Software – file software
+        HKLM\SYSTEM – file system
+        the special "system" user's registry (e.g. login screen, etc.) – file default
+    each user's personal registry (i.e. their HKEY_CURRENT_USER) is located in file NTUSER.DAT in their profile directory (e.g. C:\Users\grawity\NTUSER.DAT);
+        however, HKCU\Software\Classes is stored in the file AppData\Local\Microsoft\Windows\UsrClass.dat.
+
+A list of currently loaded hives is at HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\hivelist.
+
+what about HKEY_CLASSES_ROOT? Can't we load it?
+
+I found that HKCR is actually classes key under software hive.
+
+On Windows XP and later, it's a merged view of HKCU\Software\Classes and HKLM\Software\Classes.
+The former is a separate hive, the latter isn't.
+
+You don't mention HKEY_USERS that contains default values for all users. I read it corresponds to NTUSER.dat,
+but not the one in the user directory. Is it correct?
+
+Not quite. HKEY_USERS doesn't have any information by itself, all it has is sub-hives for each user.
+For example, HKU\S-1-5-21-…-1103 corresponds to C:\Users\grawity\ntuser.dat,
+and HKU\.default corresponds to C:\Windows\System32\config\DEFAULT.
+(Note that .default is not the default user and does not contain "default values for all users". It's actually the "system" user.) 
+
+Turn SysKey Off after "Microsoft Scam"
+
+1.     Boot from windows 7 install cd.
+2.     When the Install Windows page appears, click Repair your computer to access system recovery options.
+3.     Run System Restore to last point before syskey password blocked access. (This will fail, but must be done). Click run system restore again (this will take you back to the options list)
+4.     Open Command Prompt from the options list.
+5.     Open Regedit (Type regedit into the command prompt). Regedit will open.
+6.     Navigate to: HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Lsa, and change 'SecureBoot' value to 0.
+7.     HKEY_LOCAL_MACHINE \SAM\SAM\Domains\Account Change F value to 0000
+8.     Reboot and Login
+
+
+Method 2 ISO image
+
+1. Download this file and burn the .iso to a CD. (file located in the Repository)
+2. Boot to the CD on the affected system.
+3. Follow the instructions to select the proper system drive and partition (NTFS is the partition type you are looking for).
+4. Type the path to the registry files (it’s most likely Windows/system32/config).
+5. Choose option 1 for Password reset (sam system security).
+6. Choose option 2 for Syskey status & change.
+7. Confirm that you wish to disable Syskey, then quit and confirm writing the new changes to the hive.
+8. Reboot the PC and check.
