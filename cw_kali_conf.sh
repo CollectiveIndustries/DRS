@@ -4,7 +4,7 @@
 LAN_ADDY=192.168.0.0/24
 DESKTOP_WALLPAPER=/media/cw/Live_USB/background/Background.png
 USB_SPLASH=/media/cw/Live_USB/background/cwsplash.png
-ICON_CACHE=/media/cw/Live_USB/icons
+ICON_CACHE=/usr/share/icons/cw
 
 # clear the work space and start configuration
 clear
@@ -13,7 +13,9 @@ apt-get autoremove --force-yes -y
 apt-get update
 apt-get dist-upgrade --force-yes -y
 
-# use the tunnel and git clone
+# use the proxy tunnel or regular git clone place the resulting repository in the Home SOURCE Directory.
+cd ~/SOURCE
+
 #proxychains git clone git://git.kali.org/live-build-config.git
 git clone git://git.kali.org/live-build-config.git
 
@@ -30,7 +32,7 @@ mkdir -p kali-config/common/includes.chroot/root/Desktop
 mkdir -p kali-config/common/includes.chroot/opt/
 
 # Copy GpuTest to Live Build
-cp /opt/GpuTest kali-config/common/includes.chroot/opt/
+#cp /opt/GpuTest kali-config/common/includes.chroot/opt/
 
 # BUG Copy all the desktop Icons onto Live image
 #cp ~/Desktop/* kali-config/common/includes.chroot/root/Desktop/
@@ -99,6 +101,8 @@ vinagre
 # possible application/libraries
 #libblkid-dev
 bc # precision calculator
+python-pip # Python library installer for some package dependancies
+
 EOF
 
 # Setup some aliases to add defualt options or short commands here
@@ -129,6 +133,9 @@ alias clamscan='mkdir ./clam_vault; clamscan --recursive=yes --bell --move=./cla
 # Setup ddrescue defualts
 alias ddrescue='clear; ddrescue -dfvO'
 
+# Setup diff color by defualt
+alias diff='diff color=always'
+
 EOF
 
 # Case insensitive Regular Expression matching for Windows names >..<
@@ -138,8 +145,7 @@ cat <<EOF >kali-config/common/includes.chroot/etc/rsync_exclude.conf
 [Pp][Aa][Gg][Ee][Ff][Ii][Ll][Ee].[Ss][Yy][Ss]
 [Ww][Ii][Nn][Ss][Xx][Ss]/*
 [Oo][Ll][Dd] [Ff][Ii][Rr][Ee][Ff][Oo][Xx] [Dd][Aa][Tt][Aa]
-ProgramData/HitmanPro
-temp
+[Pp][Rr][Oo][Gg][Rr][Aa][Mm][Dd][Aa][Tt][Aa]/[Hh][Ii][Tt][Mm][Aa][Nn][Pp][Rr][Oo]
 *.[Tt][Mm][Pp]
 cookies
 temporary internet files
