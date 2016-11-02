@@ -28,8 +28,8 @@ mkdir -p kali-config/common/includes.chroot/usr/share/wallpapers/kali/contents/i
 mkdir -p kali-config/common/includes.chroot/etc/apt/apt.conf.d/
 mkdir -p kali-config/common/includes.chroot/etc/xdg/autostart/
 mkdir -p kali-config/common/includes.chroot/usr/share/icons/cw/
-mkdir -p kali-config/common/includes.chroot/root/Desktop
-mkdir -p kali-config/common/includes.chroot/opt/
+#mkdir -p kali-config/common/includes.chroot/root/Desktop
+#mkdir -p kali-config/common/includes.chroot/opt/
 
 # Copy GpuTest to Live Build
 #cp /opt/GpuTest kali-config/common/includes.chroot/opt/

@@ -1,0 +1,12 @@
+[Added Associations]
+application/octet-stream=eog.desktop;
+image/jpeg=display-im6.desktop;eog.desktop;
+application/x-sharedlib=gvim.desktop;
+application/x-raw-disk-image=gnome-disk-image-mounter.desktop;
+x-scheme-handler/mailto=userapp-Thunderbird-T5QGNY.desktop;
+message/rfc822=userapp-Thunderbird-T5QGNY.desktop;
+application/pdf=evince.desktop;
+
+[Default Applications]
+x-scheme-handler/mailto=userapp-Thunderbird-T5QGNY.desktop
+message/rfc822=userapp-Thunderbird-T5QGNY.desktop

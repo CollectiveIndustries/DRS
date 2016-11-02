@@ -1,0 +1,7 @@
+ENTRY "Git Repo" URL "/root/SOURCE/A-Word-on-Security"
+ENTRY "Removable Media" URL "/media"
+ENTRY "Desktop" URL "/root/Desktop"
+ENTRY "System Configs" URL "/etc"
+ENTRY "CloneZilla images" URL "/srv/tftp/images"
+ENTRY "Disk ISO's" URL "/root/ISO"
+ENTRY "Low Level Devices" URL "/dev"
