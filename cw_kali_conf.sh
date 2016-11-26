@@ -10,14 +10,14 @@ ICON_CACHE=/usr/share/icons/cw
 clear
 apt-get autoclean --force-yes -y
 apt-get autoremove --force-yes -y
-apt-get update
-apt-get dist-upgrade --force-yes -y
+proxychains apt-get update
+proxychains apt-get dist-upgrade --force-yes -y
 
 # use the proxy tunnel or regular git clone place the resulting repository in the Home SOURCE Directory.
 cd ~/SOURCE
 
-#proxychains git clone git://git.kali.org/live-build-config.git
-git clone git://git.kali.org/live-build-config.git
+proxychains git clone git://git.kali.org/live-build-config.git
+#git clone git://git.kali.org/live-build-config.git
 
 
 # change to the working directory so we can run the base distro config scripts
@@ -72,7 +72,8 @@ gddrescue
 ddrescueview
 
 # Bare metal backup / Forensics Imaging
-clonzilla
+# package lookup seems to be broken on the preconfigured repositories for clonezilla
+#clonzilla
 
 # Drive testing
 gsmartcontrol
@@ -100,8 +101,12 @@ vinagre
 
 # possible application/libraries
 #libblkid-dev
-bc # precision calculator
-python-pip # Python library installer for some package dependancies
+
+# precision calculator
+bc
+
+#Python library installer for some package dependancies
+python-pip
 
 EOF
 
@@ -131,10 +136,12 @@ alias lsblk='lsblk -o name,label,size,fstype,model'
 alias clamscan='mkdir ./clam_vault; clamscan --recursive=yes --bell --move=./clam_vault'
 
 # Setup ddrescue defualts
-alias ddrescue='clear; ddrescue -dfvO'
+# (Direct disk access, Force overwrite, Reopen the Drive on Error, and set the default copy size to 1024)
+# 1024 cluster size with the --no-scrape --no-trim --cpass=1 options makes a fairly decent block by block cloner
+alias ddrescue='clear; ddrescue --direct --force --verbose --reopen-on-error --cluster-size=1024'
 
 # Setup diff color by defualt
-alias diff='diff color=always'
+alias diff='diff --color=always'
 
 EOF
 
@@ -179,7 +186,7 @@ mkdir -p /media/data
 # Get ethernet online
 ifup eth0
 
-# Mount CW NAS shares providing username/password and mount points
+# Mount CW NAS shares providing username/password and mount points durring boot
 mount.cifs //nas/data -o username=root,password=cw8400 /media/data
 mount.cifs //nas/tech -o username=root,password=cw8400 /media/tech
 mount.cifs //nas/cw   -o username=root,password=cw8400 /media/cw
