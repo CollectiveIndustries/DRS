@@ -125,7 +125,8 @@ alias wget='wget -c'
 # Setup defualts for Rsync
 # --prune-empty-dirs
 # the /etc/rsync_exclude.conf should be built sepratly
-alias rsync='rsync -Pazvh --exclude-from "/etc/rsync_exclude.conf"'
+# --no-OPTION will turn off the permissions, groups, and owner so we can do a straight copy to an NTFS based file system with not issues
+alias rsync='rsync -Pazvh --no-perms --no-group --no-owner --exclude-from "/etc/rsync_exclude.conf"'
 
 # Show Devices currently attached to system. Set some defualt values to display
 alias lsblk='lsblk -o name,label,size,fstype,model'
@@ -157,6 +158,8 @@ cat <<EOF >kali-config/common/includes.chroot/etc/rsync_exclude.conf
 cookies
 temporary internet files
 windows/prefetch
+hiberfil.sys
+winsxs/*
 EOF
 
 cat <<EOF >kali-config/common/includes.chroot/root/.selected_editor
