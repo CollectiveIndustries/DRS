@@ -40,12 +40,12 @@ rem reg add "HKLM\Software\Microsoft\Internet Explorer\Search" /v "SearchAssista
 @echo.
 @echo ********** Resetting Chrome Browser settings **********
 @echo.
+if exist "%userprofile%\AppData\Local\Google\Chrome\Application\chrome.exe" cd "%userprofile%\AppData\Local\Google\Chrome\Application\"
 if exist "C:\Program Files\Google\Chrome\Application\chrome.exe" cd C:\Program Files\Google\Chrome\Application"
 if exist "c:\Program Files (x86)\Google\Chrome\Application\chrome.exe" cd "c:\Program Files (x86)\Google\Chrome\Application"
 if exist chrome.exe start chrome "chrome://settings/resetProfileSettings"
 if exist chrome.exe @echo Chrome Browser has been reset
 if not exist chrome.exe @echo Chrome Browser not installed
-@echo.
 
 @echo.
 @echo ********** Resetting Firefox Browser settings **********
@@ -147,21 +147,3 @@ del %tmp%*.* /f /s /q  >nul 2>&1
 del *.tmp /f /s /q 
 
 @echo ********** All temporary files have been removed **********
-
-@echo.
-rem ******The following command adds a registry key to re-open the Tech folder on NAS******
-reg add HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce /v OpenNAS /t REG_SZ /d "cmd.exe /c start \\nas\tech" /f
-rem reg add HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce /v RemoveAdwCleaner /t REG_SZ /d "cmd.exe /c rmdir c:\adwcleaner" /f
-
-@echo.
-@echo ********** Launching Junkware Removal Tool **********
-@echo.
-\\nas\tech\clean\jrt.exe
-pause
-if exist "%userprofile%\desktop\jrt.txt" del %userprofile%\desktop\jrt.txt /f /s /q
-if exist "%userprofile%\desktop\jrt.exe" del %userprofile%\desktop\jrt.exe /f /s /q
-
-@echo.
-@echo ********** Launching AdwCleaner **********
-@echo.
-\\nas\tech\clean\adwcleaner.exe
