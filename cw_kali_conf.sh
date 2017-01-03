@@ -139,7 +139,7 @@ alias clamscan='mkdir ./clam_vault; clamscan --recursive=yes --bell --move=./cla
 # Setup ddrescue defualts
 # (Direct disk access, Force overwrite, Reopen the Drive on Error, and set the default copy size to 1024)
 # 1024 cluster size with the --no-scrape --no-trim --cpass=1 options makes a fairly decent block by block cloner
-alias ddrescue='clear; ddrescue --direct --force --verbose --reopen-on-error --cluster-size=1024'
+alias rescue='clear; ddrescue --direct --force --verbose --reopen-on-error --cluster-size=1024'
 
 # Setup diff color by defualt
 alias diff='diff --color=always'
@@ -155,8 +155,6 @@ cat <<EOF >kali-config/common/includes.chroot/etc/rsync_exclude.conf
 [Oo][Ll][Dd] [Ff][Ii][Rr][Ee][Ff][Oo][Xx] [Dd][Aa][Tt][Aa]
 [Pp][Rr][Oo][Gg][Rr][Aa][Mm][Dd][Aa][Tt][Aa]/[Hh][Ii][Tt][Mm][Aa][Nn][Pp][Rr][Oo]
 *.[Tt][Mm][Pp]
-cookies
-temporary internet files
 windows/prefetch
 hiberfil.sys
 winsxs/*
@@ -193,10 +191,6 @@ ifup eth0
 mount.cifs //nas/data -o username=root,password=cw8400 /media/data
 mount.cifs //nas/tech -o username=root,password=cw8400 /media/tech
 mount.cifs //nas/cw   -o username=root,password=cw8400 /media/cw
-
-# Grab a fresh clam av database in the background ( updates )
-# This update could take a while
-freshclam -v&
 EOF
 
 chmod a+x kali-config/common/includes.chroot/etc/rc.local
