@@ -90,12 +90,12 @@ while Question.lower() == 'r':
 
         print "\nUsing Disk {}.\n".format(RecoverDisk)
 	print "\nThe following numbers may be in decimal, hexadecimal or octal, and may be followed by\na multiplier: s = sectors, k = 1000, Ki = 1024, M = 10^6,  Mi  =  2^20, etc"
-	SkipSize = raw_input(color.HEADER+'Skip size?(min,max): '+color.END+'[128s] ')
+	SkipSize = raw_input(color.HEADER+'Skip size?(min,max): '+color.END+'[128] ')
 	if SkipSize == '':
-		SkipSize = '128s'
-	ClusterSize = raw_input(color.HEADER+'Cluster size?: '+color.END+'[1024s] ')
+		SkipSize = '128'
+	ClusterSize = raw_input(color.HEADER+'Cluster size?: '+color.END+'[1024] ')
         if ClusterSize == '':
-                ClusterSize = '1024s'
+                ClusterSize = '1024'
 	print "\n"+color.HEADER+"Recovery type:"+color.END+"\nA) Full (runs 3 copy passes, trim, and scrape)\nB) No Scrape (Copy X3, trim)\nC) No Trim (just the copy passes)\nD) Clone (copy pass 1 with a larger read size)\n\nR) Restart\nQ) Quit"
 	# Empty suites are considered syntax errors, so intentional fall-throughs
 	# should contain 'pass'
@@ -146,8 +146,11 @@ print "\n".join(str(x) for x in _DD_OPTIONS_).replace("--", "").replace("="," = 
 print color.END+color.WARNING+"Executing ddrescue."+color.END
 
 try:
-	lsblk = Popen(['ddrescue']+_DD_OPTIONS_, stdout=PIPE, stderr=PIPE)
-	out, err = lsblk.communicate()
+	rescue = Popen(['ddrescue']+_DD_OPTIONS_+[RecoverDisk,TargetDisk], stdout=PIPE, stderr=PIPE)
+	out, err = rescue.communicate()
+	print color.OKGREEN+'ddrescue '+RecoverDisk+' '+TargetDisk+color.END
+	print out
+	print color.FAIL+err+color.END
 
 except:
 	print "Error trying to call rescue"
