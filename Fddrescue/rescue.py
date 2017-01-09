@@ -15,7 +15,6 @@ RecoverDisk = ''
 
 block_list = ['lsblk', '--json', '-nd', '-o', 'name,size,model,serial']
 
-
 # This class provides the functionality we want. You only need to look at
 # this if you want to know how this works. It only needs to be defined
 # once, no need to muck around with its internals.
@@ -91,13 +90,13 @@ while Question.lower() == 'r':
 
         print "\nUsing Disk {}.\n".format(RecoverDisk)
 	print "\nThe following numbers may be in decimal, hexadecimal or octal, and may be followed by\na multiplier: s = sectors, k = 1000, Ki = 1024, M = 10^6,  Mi  =  2^20, etc"
-	SkipSize = raw_input('Skip size?(min,max): [128s] ')
+	SkipSize = raw_input(color.HEADER+'Skip size?(min,max): '+color.END+'[128s] ')
 	if SkipSize == '':
 		SkipSize = '128s'
-	ClusterSize = raw_input('Cluster size?: [1024s] ')
+	ClusterSize = raw_input(color.HEADER+'Cluster size?: '+color.END+'[1024s] ')
         if ClusterSize == '':
                 ClusterSize = '1024s'
-	print "\nRecovery type:\nA) Full (runs 3 copy passes, trim, and scrape)\nB) No Scrape (Copy X3, trim)\nC) No Trim (just the copy passes)\nD) Clone (copy pass 1 with a larger read size)\n\nR) Restart\nQ) Quit"
+	print "\n"+color.HEADER+"Recovery type:"+color.END+"\nA) Full (runs 3 copy passes, trim, and scrape)\nB) No Scrape (Copy X3, trim)\nC) No Trim (just the copy passes)\nD) Clone (copy pass 1 with a larger read size)\n\nR) Restart\nQ) Quit"
 	# Empty suites are considered syntax errors, so intentional fall-throughs
 	# should contain 'pass'
 	for case in switch(raw_input('Recovery Type []: ')):
@@ -133,6 +132,7 @@ while Question.lower() == 'r':
 		if case('r'): pass
 		if case('R'):
 			Question = 'r' # Restart the prompts
+			break
 		if case('q'): pass
 		if case('Q'):
 			print "Program Terminated"
@@ -140,6 +140,14 @@ while Question.lower() == 'r':
 	    	if case(): # default
 	        	print "Please make a valid selection."
 			Question = 'r' # restart the prompts
-	print "Selected Options."+color.OKBLUE
-	print "\n".join(str(x) for x in _DD_OPTIONS_)
-	print color.END+color.WARNING+"Executing ddrescue."+color.END
+
+print "Selected Options."+color.OKBLUE
+print "\n".join(str(x) for x in _DD_OPTIONS_).replace("--", "").replace("="," = ")
+print color.END+color.WARNING+"Executing ddrescue."+color.END
+
+try:
+	lsblk = Popen(['ddrescue']+_DD_OPTIONS_, stdout=PIPE, stderr=PIPE)
+	out, err = lsblk.communicate()
+
+except:
+	print "Error trying to call rescue"
