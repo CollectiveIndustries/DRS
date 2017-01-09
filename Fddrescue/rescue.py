@@ -94,6 +94,9 @@ while Question.lower() == 'r':
 	SkipSize = raw_input('Skip size?(min,max): [128s] ')
 	if SkipSize == '':
 		SkipSize = '128s'
+	ClusterSize = raw_input('Cluster size?: [1024s] ')
+        if ClusterSize == '':
+                ClusterSize = '1024s'
 	print "\nRecovery type:\nA) Full (runs 3 copy passes, trim, and scrape)\nB) No Scrape (Copy X3, trim)\nC) No Trim (just the copy passes)\nD) Clone (copy pass 1 with a larger read size)\n\nR) Restart\nQ) Quit"
 	# Empty suites are considered syntax errors, so intentional fall-throughs
 	# should contain 'pass'
@@ -102,28 +105,28 @@ while Question.lower() == 'r':
 		if case('A'): pass # only necessary if the rest of the suite is empty
 		if case('a'): # Full recovery
 			#
-			_DD_OPTIONS_ = ['--skip-size='+SkipSize, '--reopen-on-error', '--direct', '--force', '--verbose']
+			_DD_OPTIONS_ = ['--cluster-size='+ClusterSize, '--skip-size='+SkipSize, '--reopen-on-error', '--idirect', '--odirect', '--force', '--verbose']
 			print "Full Recovery selected."
 			#\n%s Skipsize\nDirect write access: TRUE\nreopen drive on error: TRUE\n/!\\WARNING/!\\ Force overwrite: TRUE\nSCRAPE: TRUE\nTrim: TRUE\nCopy Pass: 1,2,3" % (SkipSize)
 			break
 	    	if case('B'): pass
 		if case('b'): # No Scrape
 			#
-			_DD_OPTIONS_ = ['--skip-size='+SkipSize, '--reopen-on-error', '--direct', '--force', '--verbose', '--no-scrape']
+			_DD_OPTIONS_ = ['--cluster-size='+ClusterSize, '--skip-size='+SkipSize, '--reopen-on-error', '--idirect', '--odirect', '--force', '--verbose', '--no-scrape']
 			print "No Scrape Recovery selected."
 			#\n%s Skipsize\nDirect write access: TRUE\nreopen drive on error: TRUE\n/!\\WARNING/!\\ Force overwrite: TRUE\nSCRAPE: FALSE\nTrim: TRUE\nCopy Pass: 1,2,3" % (SkipSize)
 	        	break
 	    	if case('C'): pass
 	    	if case('c'): # No trim
 			#
-			_DD_OPTIONS_ = ['--skip-size='+SkipSize, '--reopen-on-error', '--direct', '--force', '--verbose', '--no-scrape', '--no-trim']
+			_DD_OPTIONS_ = ['--cluster-size='+ClusterSize, '--skip-size='+SkipSize, '--reopen-on-error', '--idirect', '--odirect', '--force', '--verbose', '--no-scrape', '--no-trim']
 			print "Full 3 pass clone selected."
 			#\n{} Skipsize\nDirect write access: TRUE\nreopen drive on error: TRUE\n/!\\WARNING/!\\ Force overwrite: TRUE\nSCRAPE: FALSE\nTrim: FALSE\nCopy Pass: 1,2,3"
 	        	break
 		if case('D'): pass
 		if case('d'): # Single forward copy (large block size) good drive clone
 			#
-			_DD_OPTIONS_ = ['--cpass=1', '--cluster-size=1024', '--direct', '--force', '--verbose', '--no-trim', '--no-scrape']
+			_DD_OPTIONS_ = ['--cluster-size='+ClusterSize, '--cpass=1', '--idirect', '--odirect', '--force', '--verbose', '--no-trim', '--no-scrape']
 			print "Single pass Clone selected."
 			#\n128 sector Skipsize (default)\nDirect write access: TRUE\nreopen drive on error: TRUE\n/!\\WARNING/!\\ Force overwrite: TRUE\nSCRAPE: FALSE\nTrim: FALSE\nCopy Pass: 1\nCopy Cluster Size: 1024 Sectors"
 			break
