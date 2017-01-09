@@ -102,26 +102,30 @@ while Question.lower() == 'r':
 		if case('A'): pass # only necessary if the rest of the suite is empty
 		if case('a'): # Full recovery
 			#
-			_DD_OPTIONS_ = ['--skip-size '+SkipSize, '--reopen-on-error', '--direct', '--force', '--verbose']
-			print "Full Recovery selected.\n%s Skipsize\nDirect write access: TRUE\nreopen drive on error: TRUE\n/!\\WARNING/!\\ Force overwrite: TRUE\nSCRAPE: TRUE\nTrim: TRUE\nCopy Pass: 1,2,3" % (SkipSize)
+			_DD_OPTIONS_ = ['--skip-size='+SkipSize, '--reopen-on-error', '--direct', '--force', '--verbose']
+			print "Full Recovery selected."
+			#\n%s Skipsize\nDirect write access: TRUE\nreopen drive on error: TRUE\n/!\\WARNING/!\\ Force overwrite: TRUE\nSCRAPE: TRUE\nTrim: TRUE\nCopy Pass: 1,2,3" % (SkipSize)
 			break
 	    	if case('B'): pass
 		if case('b'): # No Scrape
 			#
-			_DD_OPTIONS_ = ['--skip-size '+SkipSize, '--reopen-on-error', '--direct', '--force', '--verbose', '--no-scrape']
-			print "No Scrape Recovery selected.\n%s Skipsize\nDirect write access: TRUE\nreopen drive on error: TRUE\n/!\\WARNING/!\\ Force overwrite: TRUE\nSCRAPE: FALSE\nTrim: TRUE\nCopy Pass: 1,2,3" % (SkipSize)
+			_DD_OPTIONS_ = ['--skip-size='+SkipSize, '--reopen-on-error', '--direct', '--force', '--verbose', '--no-scrape']
+			print "No Scrape Recovery selected."
+			#\n%s Skipsize\nDirect write access: TRUE\nreopen drive on error: TRUE\n/!\\WARNING/!\\ Force overwrite: TRUE\nSCRAPE: FALSE\nTrim: TRUE\nCopy Pass: 1,2,3" % (SkipSize)
 	        	break
 	    	if case('C'): pass
 	    	if case('c'): # No trim
 			#
-			_DD_OPTIONS_ = ['--skip-size '+SkipSize, '--reopen-on-error', '--direct', '--force', '--verbose', '--no-scrape', '--no-trim']
-			print "Full Recovery selected.\n{} Skipsize\nDirect write access: TRUE\nreopen drive on error: TRUE\n/!\\WARNING/!\\ Force overwrite: TRUE\nSCRAPE: FALSE\nTrim: FALSE\nCopy Pass: 1,2,3"
+			_DD_OPTIONS_ = ['--skip-size='+SkipSize, '--reopen-on-error', '--direct', '--force', '--verbose', '--no-scrape', '--no-trim']
+			print "Full 3 pass clone selected."
+			#\n{} Skipsize\nDirect write access: TRUE\nreopen drive on error: TRUE\n/!\\WARNING/!\\ Force overwrite: TRUE\nSCRAPE: FALSE\nTrim: FALSE\nCopy Pass: 1,2,3"
 	        	break
 		if case('D'): pass
 		if case('d'): # Single forward copy (large block size) good drive clone
 			#
 			_DD_OPTIONS_ = ['--cpass=1', '--cluster-size=1024', '--direct', '--force', '--verbose', '--no-trim', '--no-scrape']
-			print "Single pass Clone selected.\n128 sector Skipsize (default)\nDirect write access: TRUE\nreopen drive on error: TRUE\n/!\\WARNING/!\\ Force overwrite: TRUE\nSCRAPE: FALSE\nTrim: FALSE\nCopy Pass: 1\nCopy Cluster Size: 1024 Sectors"
+			print "Single pass Clone selected."
+			#\n128 sector Skipsize (default)\nDirect write access: TRUE\nreopen drive on error: TRUE\n/!\\WARNING/!\\ Force overwrite: TRUE\nSCRAPE: FALSE\nTrim: FALSE\nCopy Pass: 1\nCopy Cluster Size: 1024 Sectors"
 			break
 		if case('r'): pass
 		if case('R'):
@@ -133,4 +137,6 @@ while Question.lower() == 'r':
 	    	if case(): # default
 	        	print "Please make a valid selection."
 			Question = 'r' # restart the prompts
-	print "Executing ddrescue"
+	print "Selected Options."+color.OKBLUE
+	print "\n".join(str(x) for x in _DD_OPTIONS_)
+	print color.END+color.WARNING+"Executing ddrescue."+color.END
