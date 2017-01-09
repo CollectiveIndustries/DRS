@@ -139,7 +139,7 @@ alias clamscan='mkdir ./clam_vault; clamscan --recursive=yes --bell --move=./cla
 # Setup ddrescue defualts
 # (Direct disk access, Force overwrite, Reopen the Drive on Error, and set the default copy size to 1024)
 # 1024 cluster size with the --no-scrape --no-trim --cpass=1 options makes a fairly decent block by block cloner
-alias rescue='clear; ddrescue --direct --force --verbose --reopen-on-error --cluster-size=1024'
+alias rescue='clear; ddrescue --idirect --odirect --force --verbose --reopen-on-error --cluster-size=1024'
 
 # Setup diff color by defualt
 alias diff='diff --color=always'
