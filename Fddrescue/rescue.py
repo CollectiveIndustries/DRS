@@ -7,11 +7,14 @@ import os, sys
 import shlex
 import json
 from subprocess import PIPE, Popen
+import time
+from datetime import date
 
 # Vaiable resets
 TargetDisk = None
 Question = 'r'
 RecoverDisk = ''
+CustomerName = None
 
 block_list = ['lsblk', '--json', '-nd', '-o', 'name,size,model,serial']
 
@@ -51,12 +54,14 @@ class color:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
+today = date.today()
+
 # main program loop
 while Question.lower() == 'r':
         Question = '' # Reset once we are in the loop
 # Clear screen
         os.system("clear")
-
+	print color.BOLD+"\nAttached Storage Devices.\n"+color.END
 # Search for disks
 #        grep = Popen(['grep','Disk /dev'], stdin=PIPE, stdout=PIPE)
 #        fdisk = Popen('fdisk -l'.split(), stdout=grep.stdin)
@@ -83,7 +88,7 @@ while Question.lower() == 'r':
 
 # Ask user which drive they want to recover
         while ((TargetDisk is None) or (not os.path.exists(TargetDisk))):
-		TargetDisk = raw_input('Target Drive: [] ')
+		TargetDisk = raw_input(color.FAIL+'Target Drive: '+color.END)
 
 # Search disk for partitions and list them
 # fdisk -l /dev/sda | grep "/dev/" | grep -v Disk
@@ -96,6 +101,11 @@ while Question.lower() == 'r':
 	ClusterSize = raw_input(color.HEADER+'Cluster size?: '+color.END+'[1024] ')
         if ClusterSize == '':
                 ClusterSize = '1024'
+	while (CustomerName is None):
+		CustomerName = raw_input(color.FAIL+'Customer Name?: '+color.END+' ')
+	LogFile = "%s_%s.log" % (CustomerName,today.strftime("%m-%d-%y"))
+	LogFile = LogFile.replace(" ","_").replace(",","")
+
 	print "\n"+color.HEADER+"Recovery type:"+color.END+"\nA) Full (runs 3 copy passes, trim, and scrape)\nB) No Scrape (Copy X3, trim)\nC) No Trim (just the copy passes)\nD) Clone (copy pass 1 with a larger read size)\n\nR) Restart\nQ) Quit"
 	# Empty suites are considered syntax errors, so intentional fall-throughs
 	# should contain 'pass'
@@ -145,10 +155,34 @@ print "Selected Options."+color.OKBLUE
 print "\n".join(str(x) for x in _DD_OPTIONS_).replace("--", "").replace("="," = ")
 print color.END+color.WARNING+"Executing ddrescue."+color.END
 
+
+# fork the subprocess here
+r, w = os.pipe() # these are file descriptors, not file objects
+
+pid = os.fork()
+if pid:
+    # we are the parent
+    os.close(w) # use os.close() to close a file descriptor
+    r = os.fdopen(r) # turn r into a file object
+    print "Parent: reading"
+    txt = r.read()
+    os.waitpid(pid, 0) # make sure the child process gets cleaned up
+else:
+    # we are the child
+    os.close(r)
+    w = os.fdopen(w, 'w')
+    print "Child: writing"
+    w.write("here's some text from the child")
+    w.close()
+    print "Child: closing"
+    sys.exit(0)
+
+print "Parent: got it; text =", txt
+
 try:
-	rescue = Popen(['ddrescue']+_DD_OPTIONS_+[RecoverDisk,TargetDisk], stdout=PIPE, stderr=PIPE)
+	print color.OKGREEN+'ddrescue '+RecoverDisk+' '+TargetDisk+' '+LogFile+color.END
+	rescue = Popen(['ddrescue']+_DD_OPTIONS_+[RecoverDisk,TargetDisk,LogFile], stdout=PIPE, stderr=PIPE)
 	out, err = rescue.communicate()
-	print color.OKGREEN+'ddrescue '+RecoverDisk+' '+TargetDisk+color.END
 	print out
 	print color.FAIL+err+color.END
 
