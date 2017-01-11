@@ -73,10 +73,12 @@ while Question.lower() == 'r':
 
 	    # Access data
 	    for x in decoded['blockdevices']:
-	        print color.HEADER+"Drive:  "+color.OKGREEN+"/dev/"+x['name']+color.END
-		print color.HEADER+"Size:   "+color.WARNING+x['size']+color.END
-		print color.HEADER+"Model:  "+color.END+x['model']
-		print color.HEADER+"Serial: "+color.END+x['serial']+"\n"
+		print color.HEADER+"Drive:  "+color.OKGREEN+"/dev/"+x['name']+color.END
+ 		print color.HEADER+"Size:   "+color.WARNING+x['size']+color.END
+		if x['model'] is not None:
+			print color.HEADER+"Model:  "+color.END+x['model']
+		if x['serial'] is not None:
+			print color.HEADER+"Serial: "+color.END+x['serial']+"\n"
 
 	except (ValueError, KeyError, TypeError):
 	    print "lsblk returned the wrong JSON format"
