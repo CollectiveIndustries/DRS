@@ -12,11 +12,11 @@ from datetime import date
 
 # Vaiable resets
 TargetDisk = None
-Question = 'r'
+Question = None
 RecoverDisk = ''
 CustomerName = None
 
-block_list = ['lsblk', '--json', '-nd', '-o', 'name,size,model,serial']
+block_list = ['lsblk', '--json', '-nd', '-o', 'name,size,model,serial,fstype']
 
 # This class provides the functionality we want. You only need to look at
 # this if you want to know how this works. It only needs to be defined
@@ -57,7 +57,7 @@ class color:
 today = date.today()
 
 # main program loop
-while Question.lower() == 'r':
+while Question is None:
         Question = '' # Reset once we are in the loop
 # Clear screen
         os.system("clear")
@@ -73,12 +73,14 @@ while Question.lower() == 'r':
 
 	    # Access data
 	    for x in decoded['blockdevices']:
-		print color.HEADER+"Drive:  "+color.OKGREEN+"/dev/"+x['name']+color.END
- 		print color.HEADER+"Size:   "+color.WARNING+x['size']+color.END
-		if x['model'] is not None:
-			print color.HEADER+"Model:  "+color.END+x['model']
-		if x['serial'] is not None:
-			print color.HEADER+"Serial: "+color.END+x['serial']+"\n"
+		if x['fstype'] != 'iso960': # Display valid disks with a SN
+			print color.HEADER+"Drive:  "+color.OKGREEN+"/dev/"+x['name']+color.END
+	 		print color.HEADER+"Size:   "+color.WARNING+x['size']+color.END
+			if x['model'] is not None:
+				print color.HEADER+"Model:  "+color.END+x['model']
+			if x['serial'] is not None:
+				print color.HEADER+"Serial: "+color.END+x['serial']
+		print "" # add a blank line at the end of each group as some values may not print
 
 	except (ValueError, KeyError, TypeError):
 	    print "lsblk returned the wrong JSON format"
@@ -118,36 +120,39 @@ while Question.lower() == 'r':
 			#
 			_DD_OPTIONS_ = ['--cluster-size='+ClusterSize, '--skip-size='+SkipSize, '--reopen-on-error', '--idirect', '--odirect', '--force', '--verbose']
 			print "Full Recovery selected."
+			Question = ''
 			break
 	    	if case('B'): pass
 		if case('b'): # No Scrape
 			#
 			_DD_OPTIONS_ = ['--cluster-size='+ClusterSize, '--skip-size='+SkipSize, '--reopen-on-error', '--idirect', '--odirect', '--force', '--verbose', '--no-scrape']
 			print "No Scrape Recovery selected."
+			Question = ''
 	        	break
 	    	if case('C'): pass
 	    	if case('c'): # No trim
 			#
 			_DD_OPTIONS_ = ['--cluster-size='+ClusterSize, '--skip-size='+SkipSize, '--reopen-on-error', '--idirect', '--odirect', '--force', '--verbose', '--no-scrape', '--no-trim']
 			print "Full 3 pass clone selected."
+			Question = ''
 	        	break
 		if case('D'): pass
 		if case('d'): # Single forward copy (large block size) good drive clone
 			#
 			_DD_OPTIONS_ = ['--cluster-size='+ClusterSize, '--cpass=1', '--idirect', '--odirect', '--force', '--verbose', '--no-trim', '--no-scrape']
 			print "Single pass Clone selected."
+			Question = ''
 			break
 		if case('r'): pass
-		if case('R'):
-			Question = 'r' # Restart the prompts
-			break
+		if case('R'): break # user selected R/r for Rerun
+
 		if case('q'): pass
 		if case('Q'):
 			print "Program Terminated"
 			exit(0) #normal program termination
 	    	if case(): # default
 	        	print "Please make a valid selection."
-			Question = 'r' # restart the prompts
+			# restart the prompts
 
 print "Selected Options."+color.OKBLUE
 print "\n".join(str(x) for x in _DD_OPTIONS_).replace("--", "").replace("="," = ")
@@ -186,3 +191,13 @@ try:
 
 except:
 	print "Error trying to call rescue"
+
+
+# Full recovery will work as follows.
+# 1) Run through on a full copy [cpass 1,2,3] with a larger block size (1024)
+#	Skip size of 128s,1M (128 sectors up to 1 Meg)
+
+# 2) Run a full copy with a smaller block size (128). This is a fast trim copy phase
+#	size of 128s,256s (keep skip size down low to try and copy as much as possible)
+
+# 3) 3rd run no copy, Trim and Scrape Only
