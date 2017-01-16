@@ -6,7 +6,7 @@ import ctypes
 import os, sys
 import shlex
 import json
-from subprocess import PIPE, Popen
+from subprocess import STDOUT,  PIPE, Popen, check_output, CalledProcessError
 import time
 from datetime import date
 
@@ -15,8 +15,13 @@ TargetDisk = None
 Question = None
 RecoverDisk = ''
 CustomerName = None
+TechInitials = None
 
+
+RescueMount = ['mount.cifs', '-o', 'username=root,password=cw8400,nocase', '//nas/data','/media/data']
 block_list = ['lsblk', '--json', '-nd', '-o', 'name,size,model,serial,fstype']
+
+RescueLogPath = '/media/data/DDRescue_Logs'
 
 # This class provides the functionality we want. You only need to look at
 # this if you want to know how this works. It only needs to be defined
@@ -55,6 +60,14 @@ class color:
     UNDERLINE = '\033[4m'
 
 today = date.today()
+
+try:
+	print "Mounting Storage Server...."
+	err = check_output(RescueMount)
+	print color.OKGREEN+"Server Drive Mounted."+color.END
+except CalledProcessError as ERROR:
+	print color.FAIL+"ERROR while mounting "+RescueMount[3]+'\nReturned with Error:\n>>>> '+str(ERROR)+color.END
+	exit()
 
 # main program loop
 while Question is None:
@@ -99,15 +112,18 @@ while Question is None:
 
         print "\nUsing Disk {}.\n".format(RecoverDisk)
 	print "\nThe following numbers may be in decimal, hexadecimal or octal, and may be followed by\na multiplier: s = sectors, k = 1000, Ki = 1024, M = 10^6,  Mi  =  2^20, etc"
-	SkipSize = raw_input(color.HEADER+'Skip size?(min,max): '+color.END+'[128] ')
+	SkipSize = raw_input(color.HEADER+'Skip size?(min,max): '+color.END+'[128s,1M] ')
 	if SkipSize == '':
-		SkipSize = '128'
+		SkipSize = '128s,1M'
 	ClusterSize = raw_input(color.HEADER+'Cluster size?: '+color.END+'[1024] ')
         if ClusterSize == '':
                 ClusterSize = '1024'
 	while (CustomerName is None):
 		CustomerName = raw_input(color.FAIL+'Customer Name?: '+color.END+' ')
-	LogFile = "%s_%s.log" % (CustomerName,today.strftime("%m-%d-%y"))
+	while (TechInitials is None):
+		TechInitials = raw_input(color.FAIL+'Tech Inititals?: '+color.END+' ')
+
+	LogFile = "%s_%s_%s.log" % (CustomerName,today.strftime("%m-%d-%y"),TechInitials)
 	LogFile = LogFile.replace(" ","_").replace(",","")
 
 	print "\n"+color.HEADER+"Recovery type:"+color.END+"\nA) Full (runs 3 copy passes, trim, and scrape)\nB) No Scrape (Copy X3, trim)\nC) No Trim (just the copy passes)\nD) Clone (copy pass 1 with a larger read size)\n\nR) Restart\nQ) Quit"
@@ -158,6 +174,7 @@ print "Selected Options."+color.OKBLUE
 print "\n".join(str(x) for x in _DD_OPTIONS_).replace("--", "").replace("="," = ")
 print color.END+color.WARNING+"Executing ddrescue."+color.END
 
+os.system("clear")
 
 # fork the subprocess here
 r, w = os.pipe() # these are file descriptors, not file objects
@@ -166,32 +183,22 @@ pid = os.fork()
 if pid:
     # we are the parent
     os.close(w) # use os.close() to close a file descriptor
-    r = os.fdopen(r) # turn r into a file object
-    print "Parent: reading"
-    txt = r.read()
-    os.waitpid(pid, 0) # make sure the child process gets cleaned up
-else:
-    # we are the child
-    os.close(r)
-    w = os.fdopen(w, 'w')
-    print "Child: writing"
-    w.write("here's some text from the child")
-    w.close()
-    print "Child: closing"
-    sys.exit(0)
-
-print "Parent: got it; text =", txt
-
-try:
+    try:
 	print color.OKGREEN+'ddrescue '+RecoverDisk+' '+TargetDisk+' '+LogFile+color.END
-	rescue = Popen(['ddrescue']+_DD_OPTIONS_+[RecoverDisk,TargetDisk,LogFile], stdout=PIPE, stderr=PIPE)
+	rescue = Popen(['ddrescue']+_DD_OPTIONS_+[RecoverDisk,TargetDisk,LogFile],  stderr=PIPE)
 	out, err = rescue.communicate()
 	print out
 	print color.FAIL+err+color.END
 
-except:
+    except:
 	print "Error trying to call rescue"
 
+    os.waitpid(pid, 0) # make sure the child process gets cleaned up
+else:
+    # we are the child
+    os.close(r)
+    Popen(['ddrescueview', LogFile], stdout=PIPE, stderr=PIPE)
+    sys.exit(0)
 
 # Full recovery will work as follows.
 # 1) Run through on a full copy [cpass 1,2,3] with a larger block size (1024)
