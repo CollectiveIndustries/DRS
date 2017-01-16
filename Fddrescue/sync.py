@@ -103,8 +103,20 @@ while Question is None:
 	    print "lsblk returned the wrong JSON format"
 
 # Ask user which drive they want to recover
-        RecoverDisk = raw_input('\nDisk to recover (defualt is marked in []): ['+color.OKGREEN+'/dev/sda1'+color.END+'] ')
+	print "All default options are marked with []"
+        RecoverDisk = raw_input('\nPartition to backup: ['+color.OKGREEN+'/dev/sda1'+color.END+'] ')
         if RecoverDisk == '':
                 RecoverDisk = '/dev/sda1' # defualt choice if input is blank.
+	print color.HEADER+"Choose target type:"+.color.END
+        for case in switch(raw_input('Target Type [A) Server]: ')):
+                print "\n\n" # pad down a few lines then print selected options.
+                if case('A'): pass # only necessary if the rest of the suite is empty
+                if case('a'): # Full recovery
+                        #
+                        print "Target: Server (//nas/data/)"
+			MountOptions = ['//nas/data', '/media/data']
+                        Question = ''
+                        break
+
 	break
 
