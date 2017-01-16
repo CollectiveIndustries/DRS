@@ -23,6 +23,10 @@ block_list = ['lsblk', '--json', '--noheadings', '--nodeps', '-o', 'name,size,mo
 
 RescueLogPath = '/media/data/DDRescue_Logs'
 
+# File Systems we dont need to list, genrelly these are internal or Live file systems from the USB
+FSIgnore = ['iso9660', 'squashfs']
+
+
 # This class provides the functionality we want. You only need to look at
 # this if you want to know how this works. It only needs to be defined
 # once, no need to muck around with its internals.
@@ -89,7 +93,7 @@ while Question is None:
 
 	    # Access data
 	    for x in decoded['blockdevices']:
-		if x['fstype'] != 'iso960': # Display valid disks with a SN
+		if x['fstype'] not in FSIgnore: # Make sure we list only valid drives and are NOT in the Ignore list
 			print color.HEADER+"Drive:  "+color.OKGREEN+"/dev/"+x['name']+color.END
 	 		print color.HEADER+"Size:   "+color.WARNING+x['size']+color.END
 			if x['model'] is not None:
