@@ -19,7 +19,7 @@ TechInitials = None
 
 
 RescueMount = ['mount.cifs', '-o', 'username=root,password=cw8400,nocase', '//nas/data','/media/data']
-block_list = ['lsblk', '--json', '-nd', '-o', 'name,size,model,serial,fstype']
+block_list = ['lsblk', '--json', '--noheadings', '--nodeps', '-o', 'name,size,model,serial,fstype']
 
 RescueLogPath = '/media/data/DDRescue_Logs'
 
@@ -61,10 +61,13 @@ class color:
 
 today = date.today()
 
+os.system("clear")
+
 try:
 	print "Mounting Storage Server...."
 	err = check_output(RescueMount)
 	print color.OKGREEN+"Server Drive Mounted."+color.END
+	time.sleep(10)
 except CalledProcessError as ERROR:
 	print color.FAIL+"ERROR while mounting "+RescueMount[3]+'\nReturned with Error:\n>>>> '+str(ERROR)+color.END
 	exit()
@@ -185,7 +188,7 @@ if pid:
     os.close(w) # use os.close() to close a file descriptor
     try:
 	print color.OKGREEN+'ddrescue '+RecoverDisk+' '+TargetDisk+' '+LogFile+color.END
-	rescue = Popen(['ddrescue']+_DD_OPTIONS_+[RecoverDisk,TargetDisk,LogFile],  stderr=PIPE)
+	rescue = Popen(['ddrescue']+_DD_OPTIONS_+[RecoverDisk,TargetDisk,RescueLogPath+"/"+LogFile],  stderr=PIPE)
 	out, err = rescue.communicate()
 	print out
 	print color.FAIL+err+color.END
@@ -197,7 +200,7 @@ if pid:
 else:
     # we are the child
     os.close(r)
-    Popen(['ddrescueview', LogFile], stdout=PIPE, stderr=PIPE)
+    Popen(['ddrescueview', RescueLogPath+"/"+LogFile], stdout=PIPE, stderr=PIPE)
     sys.exit(0)
 
 # Full recovery will work as follows.
