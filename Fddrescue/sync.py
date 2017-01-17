@@ -11,7 +11,7 @@ import time
 from datetime import date
 
 # Vaiable resets
-TargetDisk = None
+TargetPart = None
 Question = None
 RecoverDisk = ''
 CustomerName = None
@@ -22,9 +22,14 @@ MediaLocation = '/media/data/'
 LocalMount = ['lowntfs-3g', '-o', 'windows_names,ignore_case']
 NasMount = ['mount.cifs', BackupServer, '-o', 'username=root,password=cw8400', MediaLocation]
 
-# get a list of block devices
-block_list = ['lsblk', '--json', '--noheadings', '-o', 'name,size,model,serial,fstype']
+# Get a list of block devices
+block_list = ['lsblk', '--json', '--noheadings', '-o', 'name,size,model,serial,fstype,label']
+
+# Rsync options
 Rsync = ['rsync', '--recursive', '--compress-level=9', '--human-readable', '--progress', '--list-only', '--exclude-from=/etc/rsync_exclude.conf']
+
+# Ignore these file systems
+FSIgnore = ['iso9660', 'squashfs']
 
 # This class provides the functionality we want. You only need to look at
 # this if you want to know how this works. It only needs to be defined
@@ -86,16 +91,23 @@ while Question is None:
 				print color.HEADER+"Model:  "+color.END+x['model']
 			if x['serial'] is not None:
 				print color.HEADER+"Serial: "+color.END+x['serial']
+				print ""
 			for c in x['children']:
-				print "\t"+color.HEADER+"Partition: "+color.OKGREEN+"/dev/"+c['name']+color.END
+				print '\t'+color.UNDERLINE+'Partition:'+color.END
+				print "\t"+color.HEADER+"Name:  "+color.OKGREEN+"/dev/"+c['name']+color.END
+				if c['label'] is not None:
+					print "\t"+color.HEADER+"Label: "+color.END+c['label']
+
 				if c['fstype'] is not None:
-					print "\t"+color.HEADER+"Partition Type: "+color.OKGREEN+c['fstype']+color.END
+					print "\t"+color.HEADER+"Type:  "+color.END+c['fstype']
 				else:
-					print "\t"+color.HEADER+"Partition Type: "+color.FAIL+"UNKNOWN"+color.END
+					print "\t"+color.HEADER+"Type:  "+color.FAIL+"UNKNOWN"+color.END
+
 				if c['size'] is not None:
-					print "\t"+color.HEADER+"Partition Size: "+color.OKGREEN+c['size']+color.END
+					print "\t"+color.HEADER+"Size:  "+color.WARNING+c['size']+color.END
 				else:
-					print"\t"+color.HEADER+"Partition Size: "+color.FAIL+"UNKNOWN"+color.END
+					print"\t"+color.HEADER+"Size:  "+color.FAIL+"UNKNOWN"+color.END
+
 				print ""
 		print "" # add a blank line at the end of each group as some values may not print
 
@@ -107,7 +119,9 @@ while Question is None:
         RecoverDisk = raw_input('\nPartition to backup: ['+color.OKGREEN+'/dev/sda1'+color.END+'] ')
         if RecoverDisk == '':
                 RecoverDisk = '/dev/sda1' # defualt choice if input is blank.
-	print color.HEADER+"Choose target type:"+.color.END
+	print color.HEADER+"Choose target type:"+color.END
+	print "A) Server. Cifs share //nas/data"
+	print "B) Local Partition"
         for case in switch(raw_input('Target Type [A) Server]: ')):
                 print "\n\n" # pad down a few lines then print selected options.
                 if case('A'): pass # only necessary if the rest of the suite is empty
@@ -117,6 +131,10 @@ while Question is None:
 			MountOptions = ['//nas/data', '/media/data']
                         Question = ''
                         break
+		if case('B'): pass
+		if case('b'):
+			while (TargetPart is None):
+				TargetPart = raw_input(color.FAIL+"Target partition: "+color.END)
 
 	break
 

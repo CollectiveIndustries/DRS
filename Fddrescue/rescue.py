@@ -125,9 +125,9 @@ while Question is None:
 	ClusterSize = raw_input(color.HEADER+'Cluster size?: '+color.END+'[1024] ')
         if ClusterSize == '':
                 ClusterSize = '1024'
-	while (CustomerName is None):
+	while ((CustomerName is None) or CustomerName == ''):
 		CustomerName = raw_input(color.FAIL+'Customer Name?: '+color.END+' ')
-	while (TechInitials is None):
+	while ((TechInitials is None) or TechInitials == ''):
 		TechInitials = raw_input(color.FAIL+'Tech Inititals?: '+color.END+' ')
 
 	LogFile = "%s_%s_%s.log" % (CustomerName,today.strftime("%m-%d-%y"),TechInitials)
