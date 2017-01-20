@@ -26,10 +26,13 @@ NasMount = ['mount.cifs', BackupServer, '-o', 'username=root,password=cw8400', M
 block_list = ['lsblk', '--json', '--noheadings', '-o', 'name,size,model,serial,fstype,label']
 
 # Rsync options
-Rsync = ['rsync', '--recursive', '--compress-level=9', '--human-readable', '--progress', '--list-only', '--exclude-from=/etc/rsync_exclude.conf']
+Rsync = ['rsync', '--list-only', '--recursive', '--compress-level=9', '--human-readable', '--progress', '--no-perms', '--no-owner', '--no-group', '--no-times', '--exclude-from=/etc/rsync_exclude.conf']
 
 # Ignore these file systems
-FSIgnore = ['iso9660', 'squashfs']
+FSIgnore = ['iso9660', 'squashfs', 'crypto_LUKS', None, 'swap']
+
+# Device Ignore list
+DevIgnore = ['sr0']
 
 # This class provides the functionality we want. You only need to look at
 # this if you want to know how this works. It only needs to be defined
@@ -84,7 +87,7 @@ while Question is None:
 
 	    # Access data
 	    for x in decoded['blockdevices']:
-		if x['fstype'] != 'iso960': # Display valid disks with a SN
+		if x['name'] not in DevIgnore: # Display valid disks with a SN
 			print color.HEADER+"Drive:  "+color.OKGREEN+"/dev/"+x['name']+color.END
 	 		print color.HEADER+"Size:   "+color.WARNING+x['size']+color.END
 			if x['model'] is not None:
@@ -93,22 +96,23 @@ while Question is None:
 				print color.HEADER+"Serial: "+color.END+x['serial']
 				print ""
 			for c in x['children']:
-				print '\t'+color.UNDERLINE+'Partition:'+color.END
-				print "\t"+color.HEADER+"Name:  "+color.OKGREEN+"/dev/"+c['name']+color.END
-				if c['label'] is not None:
-					print "\t"+color.HEADER+"Label: "+color.END+c['label']
+				if c['fstype'] not in FSIgnore:
+					print '\t'+color.UNDERLINE+'Partition:'+color.END
+					print "\t"+color.HEADER+"Name:  "+color.OKGREEN+"/dev/"+c['name']+color.END
+					if c['label'] is not None:
+						print "\t"+color.HEADER+"Label: "+color.END+c['label']
 
-				if c['fstype'] is not None:
-					print "\t"+color.HEADER+"Type:  "+color.END+c['fstype']
-				else:
-					print "\t"+color.HEADER+"Type:  "+color.FAIL+"UNKNOWN"+color.END
+					if c['fstype'] is not None:
+						print "\t"+color.HEADER+"Type:  "+color.END+c['fstype']
+					else:
+						print "\t"+color.HEADER+"Type:  "+color.FAIL+"UNKNOWN"+color.END
 
-				if c['size'] is not None:
-					print "\t"+color.HEADER+"Size:  "+color.WARNING+c['size']+color.END
-				else:
-					print"\t"+color.HEADER+"Size:  "+color.FAIL+"UNKNOWN"+color.END
+					if c['size'] is not None:
+						print "\t"+color.HEADER+"Size:  "+color.WARNING+c['size']+color.END
+					else:
+						print"\t"+color.HEADER+"Size:  "+color.FAIL+"UNKNOWN"+color.END
 
-				print ""
+					print ""
 		print "" # add a blank line at the end of each group as some values may not print
 
 	except (ValueError, KeyError, TypeError):
@@ -122,6 +126,7 @@ while Question is None:
 	print color.HEADER+"Choose target type:"+color.END
 	print "A) Server. Cifs share //nas/data"
 	print "B) Local Partition"
+	print "\nR) Rescan Device list"
         for case in switch(raw_input('Target Type [A) Server]: ')):
                 print "\n\n" # pad down a few lines then print selected options.
                 if case('A'): pass # only necessary if the rest of the suite is empty
@@ -130,11 +135,20 @@ while Question is None:
                         print "Target: Server (//nas/data/)"
 			MountOptions = ['//nas/data', '/media/data']
                         Question = ''
+			while ((CustomerName is None) or (CustomerName == '')):
+				CustomerName = raw_input(color.FAIL+"Customer name: "+color.END)
+			CustomerName = shlex.qoute(CustomerName) # support for "Lastname, Firstname DATE TECH" as the filename
                         break
 		if case('B'): pass
 		if case('b'):
-			while (TargetPart is None):
+			while ((TargetPart is None) or (TargetPart == '')):
 				TargetPart = raw_input(color.FAIL+"Target partition: "+color.END)
-
-	break
-
+			MountOptions = [TargetPart, '/media/data']
+			Question = ''
+			break
+		if case('R'): pass
+		if case('r'): pass # Fall through to the end of the loop and rescan targets
+		if case():
+			Question = None # invalid Option was selected reset the loop
+			break
+	print "End of Loop"
