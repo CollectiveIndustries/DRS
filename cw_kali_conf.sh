@@ -126,7 +126,7 @@ alias wget='wget -c'
 # --prune-empty-dirs
 # the /etc/rsync_exclude.conf should be built sepratly
 # --no-OPTION will turn off the permissions, groups, and owner so we can do a straight copy to an NTFS based file system with not issues
-alias rsync='rsync --partial --progress --times --recursive --compress --human-readable --verbose --no-perms --no-group --no-owner --exclude-from "/etc/rsync_exclude.conf"'
+alias rsync='rsync --partial --progress --times --recursive --compress --human-readable --verbose --no-perms --no-group --no-owner --no-times --exclude-from "/etc/rsync_exclude.conf"'
 
 # Show Devices currently attached to system. Set some defualt values to display
 alias lsblk='lsblk -o name,label,size,fstype,model'
