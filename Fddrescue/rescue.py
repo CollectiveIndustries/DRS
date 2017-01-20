@@ -17,10 +17,16 @@ RecoverDisk = ''
 CustomerName = None
 TechInitials = None
 
-
+# Mount options for the CIFS server share
 RescueMount = ['mount.cifs', '-o', 'username=root,password=cw8400,nocase', '//nas/data','/media/data']
+
+# Block listing with json format so we can parse the device list
 block_list = ['lsblk', '--json', '--noheadings', '--nodeps', '-o', 'name,size,model,serial,fstype']
 
+# file system repair after the clone or rescue we need to reset bad blocks and journal files.
+NtfsFix = ['ntfsfix', '--clear-bad-sectors', '--clean-dirty']
+
+# Log file location
 RescueLogPath = '/media/data/DDRescue_Logs'
 
 # File Systems we dont need to list, genrelly these are internal or Live file systems from the USB
@@ -193,10 +199,6 @@ if pid:
     try:
 	print color.OKGREEN+'ddrescue '+RecoverDisk+' '+TargetDisk+' '+LogFile+color.END
 	rescue = Popen(['ddrescue']+_DD_OPTIONS_+[RecoverDisk,TargetDisk,RescueLogPath+"/"+LogFile],  stderr=PIPE)
-	out, err = rescue.communicate()
-	print out
-	print color.FAIL+err+color.END
-
     except:
 	print "Error trying to call rescue"
 
