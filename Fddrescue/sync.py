@@ -32,7 +32,7 @@ Rsync = ['rsync', '--recursive', '--compress-level=9', '--human-readable', '--pr
 FSIgnore = ['iso9660', 'squashfs', 'crypto_LUKS', None, 'swap']
 
 # Device Ignore list
-DevIgnore = ['sr0']
+DevIgnore = ['sr0', 'loop0']
 
 # This class provides the functionality we want. You only need to look at
 # this if you want to know how this works. It only needs to be defined
