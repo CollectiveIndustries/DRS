@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Python script to set variables and call ddrescue.
+# Python script to set variables and call rsync.
 
 import ctypes
 import os, sys
@@ -13,14 +13,15 @@ from datetime import date
 # Vaiable resets
 TargetPart = None
 Question = None
-RecoverDisk = ''
+BackupDisk = ''
 CustomerName = None
 TechName = None
-BackupServer = '//nas/data'
-MediaLocation = '/media/data/'
 
-LocalMount = ['lowntfs-3g', '-o', 'windows_names,ignore_case']
-NasMount = ['mount.cifs', '-o', 'username=root,password=cw8400', BackupServer, MediaLocation]
+class Mount:
+
+	NTFS = ['lowntfs-3g', '-o', 'windows_names,ignore_case']
+	NAS = ['mount.cifs', '-o', 'username=root,password=cw8400', '//nas/data', '/media/data']
+
 
 # Get a list of block devices
 block_list = ['lsblk', '--json', '--noheadings', '-o', 'name,size,model,serial,fstype,label']
@@ -32,7 +33,7 @@ Rsync = ['rsync', '--recursive', '--compress-level=9', '--human-readable', '--pr
 FSIgnore = ['iso9660', 'squashfs', 'crypto_LUKS', None, 'swap']
 
 # Device Ignore list
-DevIgnore = ['sr0', 'loop0']
+DevIgnore = ['sr0', 'sr1', 'loop0']
 
 # This class provides the functionality we want. You only need to look at
 # this if you want to know how this works. It only needs to be defined
@@ -124,9 +125,10 @@ while Question is None:
 
 # Ask user which drive they want to recover
 	print("All default options are marked with []")
-	RecoverDisk = input('\nPartition to backup: ['+color.OKGREEN+'/dev/sda1'+color.END+'] ')
-	if RecoverDisk == '':
-		RecoverDisk = '/dev/sda1' # defualt choice if input is blank.
+	BackupDisk = input('\nPartition to backup: ['+color.OKGREEN+'/dev/sda1'+color.END+'] ')
+	if BackupDisk == '':
+		BackupDisk = '/dev/sda1' # defualt choice if input is blank.
+
 	print(color.HEADER+"Choose target type:"+color.END)
 	print("A) Server. Cifs share //nas/data")
 	print("B) Local Partition")
@@ -137,7 +139,8 @@ while Question is None:
 		if case('b'):
 			while ((TargetPart is None) or (TargetPart == '')):
 				TargetPart = input(color.FAIL+"Target partition: "+color.END)
-			MountCommand = LocalMount + [TargetPart, '/media/data']
+			MountCommand = Mount.NTFS + [TargetPart, '/media/data']
+			DestFolder = 'Data/' # local backups to systems need to go into the Data folder
 			Question = 'B'
 			break
 		if case('R'): pass
@@ -148,32 +151,47 @@ while Question is None:
 		if case('a'): pass # Backup data to cifs share by defualt
 		if case(): # Default option
 			print("Target: Server (//nas/data/)")
-			MountCommand = NasMount
+			MountCommand = Mount.NAS
 			Question = 'A'
 			while ((CustomerName is None) or (CustomerName == '')):
 				CustomerName = input(color.FAIL+"Customer name: "+color.END)
+
+			while ((TechName is None) or (TechName == '')):
+				TechName = input(color.FAIL+"Tech Initials: "+color.END)
+
+			DestFolder = CustomerName+' '+today.strftime("%m-%d-%y")+' '+TechName+'/'
+			# Support for "Lastname, Firstname DATE TECH" as the folder name
 			break
 
-
-while ((TechName is None) or (TechName == '')):
-	TechName = input(color.FAIL+"Tech Initials: "+color.END)
-
-DestFolder = CustomerName+' '+today.strftime("%m-%d-%y")+' '+TechName
-# Support for "Lastname, Firstname DATE TECH" as the folder name
 
 # Mount the filesystem
 DestMount = Popen(MountCommand, stdout=PIPE, stderr=PIPE)
 Dout, Derr = DestMount.communicate()
 
-SourceMount = Popen(LocalMount+[RecoverDisk, '/mnt'], stdout=PIPE, stderr=PIPE)
+SourceMount = Popen(Mount.NTFS+[BackupDisk, '/mnt'], stdout=PIPE, stderr=PIPE)
 Sout, Serr = SourceMount.communicate()
 
 # Start the sync
 
-Sync = Popen(Rsync+['/mnt/','/media/data/'+DestFolder+'/'], stderr=PIPE)
-Sync.communicate() # Wait for the process to finish
+start_time = time.time()
+
+Sync = Popen(Rsync+['/mnt/','/media/data/'+DestFolder], stdout=PIPE, stderr=PIPE)
+
+# write all output dirrectly to the terminal durring the transfer
+
+for c in iter(lambda: Sync.stdout.read(1), ''):
+        sys.stdout.write(c.decode("utf-8"))
+
+# Sync.communicate() # Wait for the process to finish
 
 # Silently kill error output, let the normal output go to the screen
 
+end_time = time.time()
+
+hours, rem = divmod(end_time-start_time, 3600)
+minutes, seconds = divmod(rem, 60)
+
+print(color.OKGREEN+"Backup finished in:"+color.END)
+print("{:0>2} Hours {:0>2} Minutes {:05.2f} Seconds".format(int(hours),int(minutes),seconds))
 
 # End the program
