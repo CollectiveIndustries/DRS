@@ -22,18 +22,18 @@ class Mount:
 	NTFS = ['lowntfs-3g', '-o', 'windows_names,ignore_case']
 	NAS = ['mount.cifs', '-o', 'username=root,password=cw8400', '//nas/data', '/media/data']
 
+# class container for Ignore lists
+# TODO set up regex for these to avoid adding loop0 loop1...loopX
+
+class ignore:
+	filesystems = ['iso9660', 'squashfs', 'crypto_LUKS', None, 'swap']
+	devices = ['sr0', 'sr1', 'loop0']
 
 # Get a list of block devices
 block_list = ['lsblk', '--json', '--noheadings', '-o', 'name,size,model,serial,fstype,label']
 
 # Rsync options
 Rsync = ['rsync', '--recursive', '--compress-level=9', '--human-readable', '--progress', '--no-perms', '--no-owner', '--no-group', '--no-times', '--exclude-from=/etc/rsync_exclude.conf']
-
-# Ignore these file systems
-FSIgnore = ['iso9660', 'squashfs', 'crypto_LUKS', None, 'swap']
-
-# Device Ignore list
-DevIgnore = ['sr0', 'sr1', 'loop0']
 
 # This class provides the functionality we want. You only need to look at
 # this if you want to know how this works. It only needs to be defined
@@ -90,7 +90,7 @@ while Question is None:
 
 	# Access data
 		for x in decoded['blockdevices']:
-			if x['name'] not in DevIgnore: # Display valid disks with a SN
+			if x['name'] not in ignore.devices: # Display valid disks with a SN
 				print(color.HEADER+"Drive:  "+color.OKGREEN+"/dev/"+x['name']+color.END)
 				print(color.HEADER+"Size:   "+color.WARNING+x['size']+color.END)
 				if x['model'] is not None:
@@ -99,7 +99,7 @@ while Question is None:
 					print(color.HEADER+"Serial: "+color.END+x['serial'])
 					print("")
 				for c in x['children']:
-					if c['fstype'] not in FSIgnore:
+					if c['fstype'] not in ignore.filesystems:
 						print('\t'+color.UNDERLINE+'Partition:'+color.END)
 						print("\t"+color.HEADER+"Name:  "+color.OKGREEN+"/dev/"+c['name']+color.END)
 						if c['label'] is not None:
@@ -178,6 +178,7 @@ start_time = time.time()
 Sync = Popen(Rsync+['/mnt/','/media/data/'+DestFolder], stdout=PIPE, stderr=PIPE)
 
 # write all output dirrectly to the terminal durring the transfer
+# durring the output we can parse it format it correctly and display the results the way it should be presented.
 
 for c in iter(lambda: Sync.stdout.read(1), ''):
         sys.stdout.write(c.decode("utf-8"))
