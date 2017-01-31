@@ -17,10 +17,12 @@ BackupDisk = ''
 CustomerName = None
 TechName = None
 
-class Mount:
-
-	NTFS = ['lowntfs-3g', '-o', 'windows_names,ignore_case']
-	NAS = ['mount.cifs', '-o', 'username=root,password=cw8400', '//nas/data', '/media/data']
+class prog:
+	lsblk = ['lsblk', '--json', '--noheadings', '-o', 'name,size,model,serial,fstype,label']
+	rsync = ['rsync', '--recursive', '--compress-level=9', '--human-readable', '--progress', '--no-perms', '--no-owner', '--no-group', '--no-times', '--ignore-existing', '--exclude-from=/etc/rsync_exclude.conf']
+	cp = ['cp', '/media/cw/Drew/Live_USB/scripts/rsync_exclude.conf', '/etc/rsync_exclude.conf']
+	ntfs = ['lowntfs-3g', '-o', 'windows_names,ignore_case']
+	cifs = ['mount.cifs', '-o', 'username=root,password=cw8400', '//nas/data', '/media/data']
 
 # class container for Ignore lists
 # TODO set up regex for these to avoid adding loop0 loop1...loopX
@@ -28,12 +30,6 @@ class Mount:
 class ignore:
 	filesystems = ['iso9660', 'squashfs', 'crypto_LUKS', None, 'swap']
 	devices = ['sr0', 'sr1', 'loop0']
-
-# Get a list of block devices
-block_list = ['lsblk', '--json', '--noheadings', '-o', 'name,size,model,serial,fstype,label']
-
-# Rsync options
-Rsync = ['rsync', '--recursive', '--compress-level=9', '--human-readable', '--progress', '--no-perms', '--no-owner', '--no-group', '--no-times', '--exclude-from=/etc/rsync_exclude.conf']
 
 # This class provides the functionality we want. You only need to look at
 # this if you want to know how this works. It only needs to be defined
@@ -139,7 +135,7 @@ while Question is None:
 		if case('b'):
 			while ((TargetPart is None) or (TargetPart == '')):
 				TargetPart = input(color.FAIL+"Target partition: "+color.END)
-			MountCommand = Mount.NTFS + [TargetPart, '/media/data']
+			MountCommand = prog.ntfs + [TargetPart, '/media/data']
 			DestFolder = 'Data/' # local backups to systems need to go into the Data folder
 			Question = 'B'
 			break
@@ -151,7 +147,7 @@ while Question is None:
 		if case('a'): pass # Backup data to cifs share by defualt
 		if case(): # Default option
 			print("Target: Server (//nas/data/)")
-			MountCommand = Mount.NAS
+			MountCommand = prog.cifs
 			Question = 'A'
 			while ((CustomerName is None) or (CustomerName == '')):
 				CustomerName = input(color.FAIL+"Customer name: "+color.END)
@@ -168,22 +164,15 @@ while Question is None:
 DestMount = Popen(MountCommand, stdout=PIPE, stderr=PIPE)
 Dout, Derr = DestMount.communicate()
 
-SourceMount = Popen(Mount.NTFS+[BackupDisk, '/mnt'], stdout=PIPE, stderr=PIPE)
+SourceMount = Popen(prog.ntfs+[BackupDisk, '/mnt'], stdout=PIPE, stderr=PIPE)
 Sout, Serr = SourceMount.communicate()
 
 # Start the sync
 
 start_time = time.time()
 
-Sync = Popen(Rsync+['/mnt/','/media/data/'+DestFolder], stdout=PIPE, stderr=PIPE)
-
-# write all output dirrectly to the terminal durring the transfer
-# durring the output we can parse it format it correctly and display the results the way it should be presented.
-
-for c in iter(lambda: Sync.stdout.read(1), ''):
-        sys.stdout.write(c.decode("utf-8"))
-
-# Sync.communicate() # Wait for the process to finish
+Sync = Popen(prog.rsync+['/mnt/','/media/data/'+DestFolder], stderr=PIPE)
+Sync.communicate() # Wait for the process to finish
 
 # Silently kill error output, let the normal output go to the screen
 
@@ -193,6 +182,6 @@ hours, rem = divmod(end_time-start_time, 3600)
 minutes, seconds = divmod(rem, 60)
 
 print(color.OKGREEN+"Backup finished in:"+color.END)
-print("{:0>2} Hours {:0>2} Minutes {:05.2f} Seconds".format(int(hours),int(minutes),seconds))
+print("{:0>2} Hour(s) {:0>2} Minutes {:05.2f} Seconds".format(int(hours),int(minutes),seconds))
 
 # End the program
