@@ -69,6 +69,13 @@ class color:
 
 today = date.today()
 
+print("Reading exclude list.....")
+
+cp = Popen(prog.cp, stdout=PIPE, stderr=PIPE)
+cout, cerr = cp.communicate()
+
+print(color.OKGREEN+"[DONE]"+color.END)
+
 # main program loop
 while Question is None:
 # Clear screen
@@ -76,7 +83,7 @@ while Question is None:
 	print(color.BOLD+"\nAttached Storage Devices.\n"+color.END)
 
 # Search for disks
-	lsblk = Popen(block_list, stdout=PIPE, stderr=PIPE)
+	lsblk = Popen(prog.lsblk, stdout=PIPE, stderr=PIPE)
 	out, err = lsblk.communicate()
 #	print(out)
 
