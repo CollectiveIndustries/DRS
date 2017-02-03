@@ -18,6 +18,7 @@ CustomerName = None
 TechName = None
 
 class prog:
+	umount = ['umount']
 	lsblk = ['lsblk', '--json', '--noheadings', '-o', 'name,size,model,serial,fstype,label']
 	rsync = ['rsync', '--recursive', '--compress-level=9', '--human-readable', '--progress', '--no-perms', '--no-owner', '--no-group', '--no-times', '--ignore-existing', '--exclude-from=/etc/rsync_exclude.conf']
 	cp = ['cp', '/media/cw/Drew/Live_USB/scripts/rsync_exclude.conf', '/etc/rsync_exclude.conf']
@@ -143,6 +144,11 @@ while Question is None:
 			while ((TargetPart is None) or (TargetPart == '')):
 				TargetPart = input(color.FAIL+"Target partition: "+color.END)
 			MountCommand = prog.ntfs + [TargetPart, '/media/data']
+
+			# unmount filesystem before trying to mount it
+			Umount = Popen(prog.umount + [TargetPart], stdout=PIPE, stderr=PIPE)
+			Umount.communicate()
+
 			DestFolder = 'Data/' # local backups to systems need to go into the Data folder
 			Question = 'B'
 			break
@@ -166,6 +172,10 @@ while Question is None:
 			# Support for "Lastname, Firstname DATE TECH" as the folder name
 			break
 
+
+# Unmount filesystems in preperation of mounting them.
+UmountBack = Popen(prog.umount+[BackupDisk], stdout=PIPE, stderr=PIPE)
+UmountBack.communicate()
 
 # Mount the filesystem
 DestMount = Popen(MountCommand, stdout=PIPE, stderr=PIPE)
