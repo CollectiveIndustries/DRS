@@ -53,9 +53,33 @@ while Question is None:
 	print "(A) GsmartControl - Harddrive Diagnostics."
 	print "(B) Ddrescue - Hard drive recovery + sector cloning."
 	print "(C) Rsync - Backup file systems to drive or server."
-	print "(D) Chntpw - Offline Windows password reset."
+#	print "(D) Chntpw - Offline Windows password reset."
 
 	print "\n(Q) Quit - Closes terminal window"
 	print "(S) Shutdown - Shuts down system"
 	print "(R) Reboot - Reboot system"
-	Question = ''
+
+
+	for case in switch(raw_input('Select: ')):
+		if case("A"): pass
+		if case("a"):
+			print("Running gsmart hdd diagnostics.")
+			break
+		if case("B"): pass
+		if case("b"):
+			print("Calling ddrescue.")
+			break
+		if case("C"): pass
+		if case("c"):
+			print("Running rsync backup.")
+		if case("Q"): pass
+		if case("q"):
+			break
+		if case("S"): pass
+		if case("s"):
+			print("Shutting down system")
+			break
+		if case("R"): pass
+		if case("r"):
+			print("Rebooting system")
+			break

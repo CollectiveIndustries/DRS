@@ -68,6 +68,8 @@ class color:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
+# MAIN ENTRY POINT
+
 today = date.today()
 
 print("Reading exclude list.....")
