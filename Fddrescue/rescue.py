@@ -10,6 +10,8 @@ from subprocess import STDOUT,  PIPE, Popen, check_output, CalledProcessError
 import time
 from datetime import date
 
+from shared import lib
+
 # Vaiable resets
 TargetDisk = None
 Question = None
@@ -17,57 +19,8 @@ RecoverDisk = ''
 CustomerName = None
 TechInitials = None
 
-# Mount options for the CIFS server share
-RescueMount = ['mount.cifs', '-o', 'username=root,password=cw8400,nocase', '//nas/data','/media/data']
-
-# Block listing with json format so we can parse the device list
-block_list = ['lsblk', '--json', '--noheadings', '--nodeps', '-o', 'name,size,model,serial,fstype']
-
-# file system repair after the clone or rescue we need to reset bad blocks and journal files.
-NtfsFix = ['ntfsfix', '--clear-bad-sectors', '--clean-dirty']
-
 # Log file location
 RescueLogPath = '/media/data/DDRescue_Logs'
-
-# File Systems we dont need to list, genrelly these are internal or Live file systems from the USB
-FSIgnore = ['iso9660', 'squashfs']
-
-
-# This class provides the functionality we want. You only need to look at
-# this if you want to know how this works. It only needs to be defined
-# once, no need to muck around with its internals.
-# Located at http://code.activestate.com/recipes/410692/
-class switch(object):
-    def __init__(self, value):
-        self.value = value
-        self.fall = False
-
-    def __iter__(self):
-        """Return the match method once, then stop"""
-        yield self.match
-        raise StopIteration
-
-    def match(self, *args):
-        """Indicate whether or not to enter a case suite"""
-        if self.fall or not args:
-            return True
-        elif self.value in args:
-            self.fall = True
-            return True
-        else:
-            return False
-
-
-# Text output color definitions
-class color:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    END = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
 
 today = date.today()
 
@@ -75,11 +28,11 @@ os.system("clear")
 
 try:
 	print "Mounting Storage Server...."
-	err = check_output(RescueMount)
-	print color.OKGREEN+"Server Drive Mounted."+color.END
+	err = check_output(lib.prog.cifs)
+	print lib.color.OKGREEN+"Server Drive Mounted."+lib.color.END
 	time.sleep(10)
 except CalledProcessError as ERROR:
-	print color.FAIL+"ERROR while mounting "+RescueMount[3]+'\nReturned with Error:\n>>>> '+str(ERROR)+color.END
+	print lib.color.FAIL+"ERROR while mounting "+RescueMount[3]+'\nReturned with Error:\n>>>> '+str(ERROR)+lib.color.END
 	exit()
 
 # main program loop
@@ -87,11 +40,11 @@ while Question is None:
         Question = '' # Reset once we are in the loop
 # Clear screen
         os.system("clear")
-	print color.BOLD+"\nAttached Storage Devices.\n"+color.END
+	print lib.color.BOLD+"\nAttached Storage Devices.\n"+lib.color.END
 # Search for disks
 #        grep = Popen(['grep','Disk /dev'], stdin=PIPE, stdout=PIPE)
 #        fdisk = Popen('fdisk -l'.split(), stdout=grep.stdin)
-	lsblk = Popen(block_list, stdout=PIPE, stderr=PIPE)
+	lsblk = Popen(lib.prog.lsblk, stdout=PIPE, stderr=PIPE)
 	out, err = lsblk.communicate()
 
 	try:
@@ -99,50 +52,50 @@ while Question is None:
 
 	    # Access data
 	    for x in decoded['blockdevices']:
-		if x['fstype'] not in FSIgnore: # Make sure we list only valid drives and are NOT in the Ignore list
-			print color.HEADER+"Drive:  "+color.OKGREEN+"/dev/"+x['name']+color.END
-	 		print color.HEADER+"Size:   "+color.WARNING+x['size']+color.END
+		if x['name'] not in lib.ignore.devices: # Make sure we list only valid drives and are NOT in the Ignore list
+			print lib.color.HEADER+"Drive:  "+lib.color.OKGREEN+"/dev/"+x['name']+lib.color.END
+	 		print lib.color.HEADER+"Size:   "+lib.color.WARNING+x['size']+lib.color.END
 			if x['model'] is not None:
-				print color.HEADER+"Model:  "+color.END+x['model']
+				print lib.color.HEADER+"Model:  "+lib.color.END+x['model']
 			if x['serial'] is not None:
-				print color.HEADER+"Serial: "+color.END+x['serial']
+				print lib.color.HEADER+"Serial: "+lib.color.END+x['serial']
 		print "" # add a blank line at the end of each group as some values may not print
 
 	except (ValueError, KeyError, TypeError):
 	    print "lsblk returned the wrong JSON format"
 
 # Ask user which drive they want to recover
-        RecoverDisk = raw_input('\nDisk to recover (defualt is marked in []): ['+color.OKGREEN+'/dev/sda'+color.END+'] ')
+        RecoverDisk = raw_input('\nDisk to recover (defualt is marked in []): ['+lib.color.OKGREEN+'/dev/sda'+lib.color.END+'] ')
         if RecoverDisk == '':
                 RecoverDisk = '/dev/sda' # defualt choice if input is blank.
 
 # Ask user which drive they want to recover
         while ((TargetDisk is None) or (not os.path.exists(TargetDisk))):
-		TargetDisk = raw_input(color.FAIL+'Target Drive: '+color.END)
+		TargetDisk = raw_input(lib.color.FAIL+'Target Drive: '+lib.color.END)
 
 # Search disk for partitions and list them
 # fdisk -l /dev/sda | grep "/dev/" | grep -v Disk
 
         print "\nUsing Disk {}.\n".format(RecoverDisk)
 	print "\nThe following numbers may be in decimal, hexadecimal or octal, and may be followed by\na multiplier: s = sectors, k = 1000, Ki = 1024, M = 10^6,  Mi  =  2^20, etc"
-	SkipSize = raw_input(color.HEADER+'Skip size?(min,max): '+color.END+'[128s,1M] ')
+	SkipSize = raw_input(lib.color.HEADER+'Skip size?(min,max): '+lib.color.END+'[128s,1M] ')
 	if SkipSize == '':
 		SkipSize = '128s,1M'
-	ClusterSize = raw_input(color.HEADER+'Cluster size?: '+color.END+'[1024] ')
+	ClusterSize = raw_input(lib.color.HEADER+'Cluster size?: '+lib.color.END+'[1024] ')
         if ClusterSize == '':
                 ClusterSize = '1024'
 	while ((CustomerName is None) or CustomerName == ''):
-		CustomerName = raw_input(color.FAIL+'Customer Name?: '+color.END+' ')
+		CustomerName = raw_input(lib.color.FAIL+'Customer Name?: '+lib.color.END+' ')
 	while ((TechInitials is None) or TechInitials == ''):
-		TechInitials = raw_input(color.FAIL+'Tech Inititals?: '+color.END+' ')
+		TechInitials = raw_input(lib.color.FAIL+'Tech Inititals?: '+lib.color.END+' ')
 
 	LogFile = "%s_%s_%s.log" % (CustomerName,today.strftime("%m-%d-%y"),TechInitials)
 	LogFile = LogFile.replace(" ","_").replace(",","")
 
-	print "\n"+color.HEADER+"Recovery type:"+color.END+"\nA) Full (runs 3 copy passes, trim, and scrape)\nB) No Scrape (Copy X3, trim)\nC) No Trim (just the copy passes)\nD) Clone (copy pass 1 with a larger read size)\n\nR) Restart\nQ) Quit"
+	print "\n"+lib.color.HEADER+"Recovery type:"+lib.color.END+"\nA) Full (runs 3 copy passes, trim, and scrape)\nB) No Scrape (Copy X3, trim)\nC) No Trim (just the copy passes)\nD) Clone (copy pass 1 with a larger read size)\n\nR) Restart\nQ) Quit"
 	# Empty suites are considered syntax errors, so intentional fall-throughs
 	# should contain 'pass'
-	for case in switch(raw_input('Recovery Type []: ')):
+	for case in lib.switch(raw_input('Recovery Type []: ')):
 		print "\n\n" # padd down a few lines then print selected options.
 		if case('A'): pass # only necessary if the rest of the suite is empty
 		if case('a'): # Full recovery
@@ -183,9 +136,9 @@ while Question is None:
 	        	print "Please make a valid selection."
 			# restart the prompts
 
-print "Selected Options."+color.OKBLUE
+print "Selected Options."+lib.color.OKBLUE
 print "\n".join(str(x) for x in _DD_OPTIONS_).replace("--", "").replace("="," = ")
-print color.END+color.WARNING+"Executing ddrescue."+color.END
+print lib.color.END+lib.color.WARNING+"Executing ddrescue."+lib.color.END
 
 os.system("clear")
 
@@ -197,7 +150,7 @@ if pid:
     # we are the parent
     os.close(w) # use os.close() to close a file descriptor
     try:
-	print color.OKGREEN+'ddrescue '+RecoverDisk+' '+TargetDisk+' '+LogFile+color.END
+	print lib.color.OKGREEN+'ddrescue '+RecoverDisk+' '+TargetDisk+' '+LogFile+lib.color.END
 	rescue = Popen(['ddrescue']+_DD_OPTIONS_+[RecoverDisk,TargetDisk,RescueLogPath+"/"+LogFile],  stderr=PIPE)
     except:
 	print "Error trying to call rescue"
