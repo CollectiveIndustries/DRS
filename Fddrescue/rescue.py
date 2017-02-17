@@ -32,7 +32,7 @@ try:
 	print lib.color.OKGREEN+"Server Drive Mounted."+lib.color.END
 	time.sleep(10)
 except CalledProcessError as ERROR:
-	print lib.color.FAIL+"ERROR while mounting "+RescueMount[3]+'\nReturned with Error:\n>>>> '+str(ERROR)+lib.color.END
+	print lib.color.FAIL+"ERROR while mounting "+lib.prog.cifs[3]+'\nReturned with Error:\n>>>> '+str(ERROR)+lib.color.END
 	exit()
 
 # main program loop
@@ -146,21 +146,29 @@ os.system("clear")
 r, w = os.pipe() # these are file descriptors, not file objects
 
 pid = os.fork()
-if pid:
-    # we are the parent
+if pid == 0:
+    # we are the child
     os.close(w) # use os.close() to close a file descriptor
     try:
 	print lib.color.OKGREEN+'ddrescue '+RecoverDisk+' '+TargetDisk+' '+LogFile+lib.color.END
+        print "Selected Options."+lib.color.OKBLUE
+        print "\n".join(str(x) for x in _DD_OPTIONS_).replace("--", "").replace("="," = ")
+        print lib.color.END+lib.color.WARNING+"Executing ddrescue."+lib.color.END
 	rescue = Popen(['ddrescue']+_DD_OPTIONS_+[RecoverDisk,TargetDisk,RescueLogPath+"/"+LogFile],  stderr=PIPE)
-    except:
+    except :
 	print "Error trying to call rescue"
+    rescue.wait() # pause untill DDRescue is finished running
 
-    os.waitpid(pid, 0) # make sure the child process gets cleaned up
 else:
-    # we are the child
+    # we are the parent
     os.close(r)
-    Popen(['ddrescueview', RescueLogPath+"/"+LogFile], stdout=PIPE, stderr=PIPE)
+    view = Popen(['ddrescueview', RescueLogPath+"/"+LogFile], stdout=PIPE, stderr=PIPE)
+    view.wait() # pause untill Viewer is closed.
     sys.exit(0)
+
+pid, status = os.waitpid(pid, 0) # wait for child process to finish
+print "Wait returned, pid = %d, status = %d" % (pid, status)
+
 
 # Full recovery will work as follows.
 # 1) Run through on a full copy [cpass 1,2,3] with a larger block size (1024)
