@@ -4,7 +4,7 @@ class prog:
 	rsync = ['rsync', '--recursive', '--compress-level=9', '--human-readable', '--progress', '--no-perms', '--no-owner', '--no-group', '--no-times', '--ignore-existing', '--exclude-from=/etc/rsync_exclude.conf']
 	cp = ['cp', '/media/cw/Drew/Live_USB/scripts/rsync_exclude.conf', '/etc/rsync_exclude.conf']
 	ntfs = ['lowntfs-3g', '-o', 'windows_names,ignore_case']
-	cifs = ['mount.cifs', '-o', 'username=root,password=cw8400', '//nas/data', '/media/data']
+	cifs = ['mount', '-t', 'cifs', '-o', 'username=root,password=cw8400', '//192.168.0.241/data', '/media/data']
 	NtfsFix = ['ntfsfix', '--clear-bad-sectors', '--clean-dirty']
 
 # class container for Ignore lists
@@ -12,7 +12,7 @@ class prog:
 
 class ignore:
 	filesystems = ['iso9660', 'squashfs', 'crypto_LUKS', None, 'swap']
-	devices = ['sr0', 'sr1', 'loop0']
+	devices = ['sr0', 'sr1', 'loop0', 'mmcblk0boot0', 'mmcblk0boot1', 'mmcblk0rpmb']
 
 # This class provides the functionality we want. You only need to look at
 # this if you want to know how this works. It only needs to be defined
