@@ -29,11 +29,10 @@ cd live-build-config
 # make the directory paths for the live build
 mkdir -p kali-config/common/includes.chroot/usr/share/wallpapers/kali/contents/images/
 mkdir -p kali-config/common/includes.chroot/etc/apt/apt.conf.d/
-mkdir -p kali-config/common/includes.chroot/etc/skel/
+mkdir -p kali-config/common/includes.chroot/home/user/Desktop
 mkdir -p kali-config/common/includes.chroot/usr/share/icons/cw/
-mkdir -p kali-config/common/includes.chroot/opt/cw/share
+mkdir -p kali-config/common/includes.chroot/opt/cw/shared
 
-#mkdir -p kali-config/common/includes.chroot/root/Desktop
 #mkdir -p kali-config/common/includes.chroot/opt/
 
 # Copy files from local repository into live FileSystem
@@ -77,11 +76,18 @@ EOF
 cat <<EOF > kali-config/variant-$VARIANT/package-lists/cw.list.chroot
 # Tools used by Computer Wherehouse
 
+# Partition tools
+gparted
+ntfs-3g
+
+# Password reset for windows
+chntpw
+
 # Forensics tools
 gddrescue
 ddrescueview
 
-# Bare metal backup / Forensics Imaging
+# Bare Metal Backups
 # package lookup seems to be broken on the preconfigured repositories for clonezilla
 #clonzilla
 
@@ -160,7 +166,7 @@ EOF
 
 
 # XDG Autostart desktop applications
-cat <<EOF > kali-config/common/includes.chroot/etc/skel/Gsmart.desktop
+cat <<EOF > kali-config/common/includes.chroot/home/user/Desktop/Gsmart.desktop
 [Desktop Entry]
 Name=GSmart
 GenericName=Hdd Diagnostics
@@ -168,7 +174,7 @@ Comment=Auto start the Gsmart Control HDD Diagnostics system on start
 Exec=/usr/bin/gsmartcontrol
 Terminal=false
 Type=Application
-X-GNOME-Autostart-enabled=true
+X-GNOME-Autostart-enabled=false
 
 EOF
 
@@ -176,7 +182,7 @@ EOF
 # BUG: chroot hooks dont seem to be excecuted properly so were cloning the entire working environment
 echo rebuilding profiles
 
-cp -rfv ~/.config kali-config/common/includes.chroot/root/
+#cp -rfv ~/.config kali-config/common/includes.chroot/home/user/
 
 echo changing permissions
 
