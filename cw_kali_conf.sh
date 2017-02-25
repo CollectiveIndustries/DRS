@@ -17,11 +17,10 @@ proxychains apt-get update
 proxychains apt-get dist-upgrade --force-yes -y
 
 # use the proxy tunnel or regular git clone place the resulting repository in the Home SOURCE Directory.
-cd ~/SOURCE
+cd ..
 
 proxychains git clone git://git.kali.org/live-build-config.git
 #git clone git://git.kali.org/live-build-config.git
-
 
 # change to the working directory so we can run the base distro config scripts
 cd live-build-config
