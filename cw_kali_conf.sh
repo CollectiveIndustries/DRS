@@ -194,12 +194,22 @@ echo running verbose build
 # Run the build
 ./build.sh --distribution kali-rolling --verbose --variant $VARIANT --arch $ARCH
 
-# Copy the ISO image to the ISO directory mount the ISO as a loop and copy the files out to the PXE_Server web root folder
+# Unmount filesystems so we know theres nothign there
 umount /mnt/loop
-mount images/kali-linux-$VARIANT-rolling-$ARCH.iso /mnt/loop
+umount /media/cw
 
+# Mount the Kali-Linux iso and the Server/cw share so we can copy files around
+mount images/kali-linux-$VARIANT-rolling-$ARCH.iso /mnt/loop
+mount -t cifs //192.168.0.241/cw   -o username=root,password=cw8400 /media/cw
+
+# Copy squash filesystem into the web root folder were the PXE server expects to find it
 cp -v /mnt/loop/live/filesystem.squashfs /var/www/html/live/kali/filesystem.squashfs
 
+# Copy the kernel over to the shared server so that the PXE can grab it using a soft-link
+cp -v /mnt/loop/live/{initrd.img,vmlinuz} /media/cw/Drew/PXE_Server/
+
+# unmount the filesystems we just mounted and finish the build processes
 umount /mnt/loop
+umount /media/cw
 
 echo Build finished
