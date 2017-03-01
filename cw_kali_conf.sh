@@ -23,7 +23,7 @@ proxychains git clone git://git.kali.org/live-build-config.git
 #git clone git://git.kali.org/live-build-config.git
 
 # change to the working directory so we can run the base distro config scripts
-cd live-build-config
+cd live-build-config || exit
 
 # make the directory paths for the live build
 mkdir -p kali-config/common/includes.chroot/usr/share/wallpapers/kali/contents/images/
