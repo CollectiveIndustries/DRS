@@ -8,6 +8,7 @@ ICON_CACHE=/usr/share/icons/cw
 VARIANT=light
 ARCH=i386
 GCONF_OVERRIDES=/usr/share/glib-2.0/schemas/
+PASSWORD=toor
 
 # clear the work space and start configuration
 clear
@@ -31,16 +32,19 @@ mkdir -p kali-config/common/includes.chroot/etc/apt/apt.conf.d/
 mkdir -p kali-config/common/includes.chroot/home/user/Desktop
 mkdir -p kali-config/common/includes.chroot/usr/share/icons/cw/
 mkdir -p kali-config/common/includes.chroot/opt/cw/shared
-
+mkdir -p kali-config/common/includes.chroot
 #mkdir -p kali-config/common/includes.chroot/opt/
 
 # Copy files from local repository into live FileSystem
-cp ../DRS/Fddrescue/sync.py kali-config/common/includes.chroot/opt/cw/backup
-cp ../DRS/Fddrescue/rescue.py kali-config/common/includes.chroot/opt/cw/rescue
-cp ../DRS/Fddrescue/shared/*.py kali-config/common/includes.chroot/opt/cw/shared/
+cp -v ../DRS/Fddrescue/sync.py kali-config/common/includes.chroot/opt/cw/backup/sync.py
+cp -v ../DRS/Fddrescue/rescue.py kali-config/common/includes.chroot/opt/cw/rescue/rescue.py
+cp -v ../DRS/Fddrescue/shared/*.py kali-config/common/includes.chroot/opt/cw/shared/
 
 # Grab network hosted configuration settings
-cp /media/cw/Drew/Live_USB/scripts/rsync_exclude.conf kali-config/common/includes.chroot/etc/rsync_exclude.conf
+umount -l /media/cw # Lazy un mount
+mount -t cifs //192.168.0.241/cw -o username=root,password=cw8400 /media/cw
+cp -v /media/cw/Drew/Live_USB/scripts/rsync_exclude.conf kali-config/common/includes.chroot/etc/rsync_exclude.conf
+umount -l /media/cw
 
 # BUG Copy all the desktop Icons onto Live image
 #cp ~/Desktop/* kali-config/common/includes.chroot/root/Desktop/
@@ -195,8 +199,8 @@ echo running verbose build
 ./build.sh --distribution kali-rolling --verbose --variant $VARIANT --arch $ARCH
 
 # Unmount filesystems so we know theres nothign there
-umount /mnt/loop
-umount /media/cw
+umount -l /mnt/loop
+umount -l /media/cw
 
 # Mount the Kali-Linux iso and the Server/cw share so we can copy files around
 mount images/kali-linux-$VARIANT-rolling-$ARCH.iso /mnt/loop
@@ -209,7 +213,7 @@ cp -v /mnt/loop/live/filesystem.squashfs /var/www/html/live/kali/filesystem.squa
 cp -v /mnt/loop/live/{initrd.img,vmlinuz} /media/cw/Drew/PXE_Server/
 
 # unmount the filesystems we just mounted and finish the build processes
-umount /mnt/loop
-umount /media/cw
+umount -l /mnt/loop
+umount -l /media/cw
 
 echo Build finished
