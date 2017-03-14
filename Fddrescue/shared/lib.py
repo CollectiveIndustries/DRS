@@ -1,7 +1,7 @@
 class prog:
 	umount = ['umount']
 	lsblk = ['lsblk', '--json', '--noheadings', '-o', 'name,size,model,serial,fstype,label']
-	rsync = ['rsync', '--recursive', '--compress-level=9', '--human-readable', '--progress', '--no-perms', '--no-owner', '--no-group', '--no-times', '--ignore-existing', '--exclude-from=/etc/rsync_exclude.conf']
+	rsync = ['rsync', '--recursive', '--compress-level=9', '--human-readable', '--progress', '--no-perms', '--no-owner', '--no-group', '--no-times', '--ignore-existing', '--no-inc-recursive', '--exclude-from=/etc/rsync_exclude.conf']
 	cp = ['cp', '/media/cw/Drew/Live_USB/scripts/rsync_exclude.conf', '/etc/rsync_exclude.conf']
 	ntfs = ['lowntfs-3g', '-o', 'windows_names,ignore_case']
 	cifs = ['mount', '-t', 'cifs', '-o', 'username=root,password=cw8400', '//192.168.0.241/data', '/media/data']
