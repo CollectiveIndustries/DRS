@@ -139,7 +139,12 @@ Sout, Serr = SourceMount.communicate()
 
 start_time = time.time()
 
-Sync = Popen(lib.prog.rsync+['/mnt/','/media/data/'+DestFolder], stderr=PIPE)
+Sync = Popen(lib.prog.rsync+['/mnt/','/media/data/'+DestFolder], stderr=PIPE, stdout=PIPE)
+
+for line in Sync.stdout
+  # The real code does filtering here
+  print("test:", line.rstrip())
+
 Sync.communicate() # Wait for the process to finish
 
 # Silently kill error output, let the normal output go to the screen
