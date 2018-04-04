@@ -19,8 +19,8 @@ def mount(source, target, fs, options=''):
   ret = ctypes.CDLL('libc.so.6', use_errno=True).mount(source, target, fs, 0, options)
   if ret < 0:
     errno = ctypes.get_errno()
-    raise RuntimeError("Error mounting {} ({}) on {} with options '{}': {}".
-     format(source, fs, target, options, os.strerror(errno)))
+    raise RuntimeError("{}Error mounting {} ({}) on {} with options '{}': {}{}".
+     format(com.color.FAIL,source, fs, target, options, os.strerror(errno),com.color.END))
 
 while RecoverPart.lower() == 'r':
 	RecoverPart = '' # Reset once we are in the loop
@@ -32,10 +32,10 @@ while RecoverPart.lower() == 'r':
 	fdisk = Popen('fdisk -l'.split(), stdout=grep.stdin)
 	disks = grep.communicate()[0]
 	fdisk.wait()
-	print '{}'.format(disks)
+	print '{}{}{}'.format(com.color.HEADER,disks,com.color.END)
 
 # Ask user which drive they want to recover
-	RecoverDisk = raw_input('Disk to recover (defualt is marked in []): [/dev/sda] ')
+	RecoverDisk = raw_input('Disk to recover (defualt is marked in []): [{}/dev/sda{}] '.format(com.color.OKGREEN,com.color.END))
 	if RecoverDisk == '':
 		RecoverDisk = '/dev/sda' # defualt choice if input is blank.
 
