@@ -7,6 +7,7 @@ import ctypes
 import os, sys
 import shlex
 from subprocess import PIPE, Popen
+from module import com
 
 # Variable resets.
 TargetDisk = None
