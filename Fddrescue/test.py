@@ -1,20 +1,17 @@
 #!/usr/bin/env python
 
-import json
-import subprocess
+from subprocess import STDOUT,  PIPE, Popen, check_output, CalledProcessError
+from module import disk,com
 
-block_list = ['lsblk', '--json', '-nd', '-o', 'name,size,model,serial']
+def GetTree(path='/mnt'):
+        disk.prog.find[1]=path
+        find = Popen(disk.prog.find, stdout=PIPE, stderr=PIPE)
+        out, err = find.communicate()
+	return([s.strip() for s in out.splitlines()])
 
-dsk = subprocess.Popen(block_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+def SetTree(path):
+	disk.prog.mkdir[2] = path
+	mkdir = Popen(disk.prog.mkdir, stdout=PIPE, stderr=PIPE)
+	out, err = mkdir.communicate()
 
-out, err = dsk.communicate()
-
-try:
-    decoded = json.loads(out)
-
-    # Access data
-    for x in decoded['blockdevices']:
-        print "Drive: "+x['name']+" is "+x['size']
-
-except (ValueError, KeyError, TypeError):
-    print "lsblk returned the wrong JSON format"
+print(GetTree('/etc'))

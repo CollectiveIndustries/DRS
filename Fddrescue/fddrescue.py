@@ -5,6 +5,7 @@
 
 import os, sys, re
 import shlex
+import time
 from subprocess import PIPE, Popen
 from module import com, disk
 
@@ -15,6 +16,11 @@ RecoverDisk = None
 
 RecoverList = ['Movies','Games','Music']
 
+
+tmpFile = open("/tmp/rescue.sh", "w+")
+
+#add the bash Shabang before we add all the files to the recovery script
+tmpFile.write("#!/bin/bash\n")
 
 while RecoverPart.lower() == 'r':
 	RecoverPart = '' # Reset once we are in the loop
@@ -42,14 +48,17 @@ while RecoverPart.lower() == 'r':
 
 	print("Mounting [{}{}{}] on [{}/mnt{}]".format(com.color.OKGREEN,RecoverPart,com.color.END,com.color.OKGREEN,com.color.END))
 	# Mount Recovery Part Read ONLY
+	print("Building Recovery script")
 	disk.mount(RecoverPart,'/mnt','ntfs',0)
+	time.sleep(5)
 	for item in RecoverList:
 		for OldPath in disk.GetTree('/mnt/'+item):
 			NewPath = OldPath.replace('/mnt','/media/root/4a6c65b0-7cf1-4139-b210-d52b562cae24/recovered',1)
-			disk.SetTree(com.shellQoute(com.shellQoute(NewPath)))
+			disk.SetTree(NewPath)
 #			print("{}mkdir -p {}{}".format(com.color.OKGREEN,NewPath,com.color.END))
 			for file in disk.GetFiles(OldPath):
 				file = file.split('/')[-1]
-				print("Recovering {}{}{} into {}{}{}".format(com.color.OKGREEN,com.shellQoute(file),com.color.END,com.color.WARNING,com.shellQoute(NewPath),com.color.END))
-				print(com.shellQoute("{}/{}".format(OldPath,file)))
-				disk.Rescue(com.shellQoute('{}/{}'.format(OldPath,file)), com.shellQoute('{}/{}'.format(NewPath,file)))
+#				print("Recovering {}{}{} into {}{}{}".format(com.color.OKGREEN,file,com.color.END,com.color.WARNING,NewPath,com.color.END))
+				tmpFile.write(disk.Rescue("{}/{}".format(OldPath,file), "{}/{}".format(NewPath,file)))
+				tmpFile.write("\n")
+tmpFile.close()
