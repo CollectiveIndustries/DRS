@@ -26,12 +26,14 @@ block_list = ['lsblk', '--json', '--noheadings', '--nodeps', '-o', 'name,size,mo
 # file system repair after the clone or rescue we need to reset bad blocks and journal files.
 NtfsFix = ['ntfsfix', '--clear-bad-sectors', '--clean-dirty']
 
+# Make Directory Path just incase it doesnt exist
+MkDir = ['mkdir','-p']
+
 # Log file location
 RescueLogPath = '/media/data/DDRescue_Logs'
 
 # File Systems we dont need to list, genrelly these are internal or Live file systems from the USB
 FSIgnore = ['iso9660', 'squashfs']
-
 
 # This class provides the functionality we want. You only need to look at
 # this if you want to know how this works. It only needs to be defined
