@@ -3,7 +3,7 @@
 # Python script to find and mount a filesystem and then rescue data at the file system level.
 # If this fails to mount the disk we may need to image the drive.
 
-import os, sys
+import os, sys, re
 import shlex
 from subprocess import PIPE, Popen
 from module import com, disk
@@ -12,6 +12,9 @@ from module import com, disk
 TargetDisk = None
 RecoverPart = 'r'
 RecoverDisk = None
+
+RecoverList = ['Movies','Games','Music']
+
 
 while RecoverPart.lower() == 'r':
 	RecoverPart = '' # Reset once we are in the loop
@@ -40,3 +43,13 @@ while RecoverPart.lower() == 'r':
 	print("Mounting [{}{}{}] on [{}/mnt{}]".format(com.color.OKGREEN,RecoverPart,com.color.END,com.color.OKGREEN,com.color.END))
 	# Mount Recovery Part Read ONLY
 	disk.mount(RecoverPart,'/mnt','ntfs',0)
+	for item in RecoverList:
+		for OldPath in disk.GetTree('/mnt/'+item):
+			NewPath = OldPath.replace('/mnt','/media/root/4a6c65b0-7cf1-4139-b210-d52b562cae24/recovered',1)
+			disk.SetTree(com.shellQoute(com.shellQoute(NewPath)))
+#			print("{}mkdir -p {}{}".format(com.color.OKGREEN,NewPath,com.color.END))
+			for file in disk.GetFiles(OldPath):
+				file = file.split('/')[-1]
+				print("Recovering {}{}{} into {}{}{}".format(com.color.OKGREEN,com.shellQoute(file),com.color.END,com.color.WARNING,com.shellQoute(NewPath),com.color.END))
+				print(com.shellQoute("{}/{}".format(OldPath,file)))
+				disk.Rescue(com.shellQoute('{}/{}'.format(OldPath,file)), com.shellQoute('{}/{}'.format(NewPath,file)))
