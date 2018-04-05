@@ -21,9 +21,9 @@ while RecoverPart.lower() == 'r':
 	disk.listFileSystems() # List all known file systems and block devices
 
 # Ask user which drive they want to recover
-	RecoverDisk = raw_input('Disk to recover (defualt is marked in []): [{}/dev/sda{}] '.format(com.color.OKGREEN,com.color.END))
-	if RecoverDisk == '':
-		RecoverDisk = '/dev/sda' # defualt choice if input is blank.
+#	RecoverDisk = raw_input('Disk to recover (defualt is marked in []): [{}/dev/sda{}] '.format(com.color.OKGREEN,com.color.END))
+#	if RecoverDisk == '':
+#		RecoverDisk = '/dev/sda' # defualt choice if input is blank.
 
 	while RecoverPart == '':
 		RecoverPart = raw_input('Partition to recover (cannot be left blank R to return to disk selection, Q to Quit): ')
@@ -31,3 +31,12 @@ while RecoverPart.lower() == 'r':
 			break
 		if RecoverPart.lower() == 'q':
 			sys.exit(0)
+
+	while TargetDisk == None:
+		TargetDisk = raw_input('Target Location: [{}/media/data{}]'.format(com.color.OKGREEN,com.color.END))
+		if TargetDisk == '':
+			TargetDisk = '/media/data/'
+
+	print("Mounting [{}{}{}] on [{}/mnt{}]".format(com.color.OKGREEN,RecoverPart,com.color.END,com.color.OKGREEN,com.color.END))
+	# Mount Recovery Part Read ONLY
+	disk.mount(RecoverPart,'/mnt','ntfs',0)
