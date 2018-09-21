@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
 ## Include Files Here
+from sys import platform
+import time
 import os
 from sys import platform
 
@@ -45,6 +47,30 @@ class color:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
+## OS Specific Stuff
+def GetOS():
+    _SystemOS_ = platform.strip()
+    if (_SystemOS_ == 'linux' or _SystemOS_ == 'linux2'):
+    # linux
+        with open('/etc/os-release') as file:
+            oper = file.readlines()
+            oper = oper[5].split('=')
+            return oper[1].strip() # Grab OS release Name we want to know what flavor of lenny we use.
+    elif(_SystemOS_ == 'win32'):
+        return _SystemOS_
+        
+def OSClear(osname):
+    if(osname == "win32"):
+        os.system("cls")
+    else: # well its not Windows we can just "clear"
+        os.system("clear")
+        
+def OsInput(prompt, os):
+    if(os == "win32"):
+        return input(prompt)
+    elif(os == "debian"):
+        return raw_input(prompt)
+                
 # This class provides the functionality we want. You only need to look at
 # this if you want to know how this works. It only needs to be defined
 # once, no need to muck around with its internals.
@@ -71,6 +97,8 @@ class switch(object):
 
 # Variable definistions
 Question = None
+_OS_ = GetOS()
+_sleep_ = 5
 
 _OS_ = GetOS()
 
@@ -88,20 +116,25 @@ while Question is None:
     print("(R) Reboot - Reboot system")
 
 
-    for case in switch(OsInput("Select: ",_OS_).lower()):
-        if case("a"):
-            print("Running gsmart hdd diagnostics.")
-            break
-        if case("b"):
-            print("Calling ddrescue.")
-            break
-        if case("c"):
-            print("Running rsync backup.")
-        if case("q"):
-            break
-        if case("s"):
-            print("Shutting down system")
-            break
-        if case("r"):
-            print("Rebooting system")
-        break
+	for case in switch(OsInput("Select: ",_OS_).lower()):
+		if case("a"):
+			print("Running gsmart hdd diagnostics.")
+			time.sleep(_sleep_)
+			break
+		if case("b"):
+			print("Calling ddrescue.")
+			time.sleep(_sleep_)
+			break
+		if case("c"):
+			print("Running rsync backup.")
+			time.sleep(_sleep_)
+		if case("q"):
+			break
+		if case("s"):
+			print("Shutting down system")
+			time.sleep(_sleep_)
+			break
+		if case("r"):
+			print("Rebooting system")
+			time.sleep(_sleep_)
+			break
