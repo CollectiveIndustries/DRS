@@ -45,7 +45,23 @@ def OsInput(prompt, os):
         return input(prompt)
     elif(os == "debian"):
         return raw_input(prompt)
-                
+   
+def Shutdown(os):
+	if(_OS_ == 'win32'):
+		# Windows shutdown command
+		os.system('shutdown', '/s')
+	elif(_OS_ == 'debian'):
+		# Debian shutdown command
+		os.system('sudo shutdown -h')
+		
+def Reboot(os):
+	if(_OS_ == 'win32'):
+		# Windows reboot command
+		os.system('shutdown', '/r')
+	elif(_OS_ == 'debian'):
+		# Debian reboot command
+		os.system('sudo reboot')
+		
 # This class provides the functionality we want. You only need to look at
 # this if you want to know how this works. It only needs to be defined
 # once, no need to muck around with its internals.
@@ -105,18 +121,10 @@ while Question is None:
 		if case("s"):
 			print("Shutting down system")
 			time.sleep(_sleep_)
-			if(_OS_ == 'win32'):
-				# windows shutdown command
-				os.system('shutdown', '/s')
-			elif(_OS_ == 'debian'):
-				os.system('sudo shutdown -h')
+			ShutDown(_OS_)
 			break
 		if case("r"):
 			print("Rebooting system")
 			time.sleep(_sleep_)
-			if(_OS_ == 'win32'):
-				# windows shutdown command
-				os.system('shutdown', '/r')
-			elif(_OS_ == 'debian'):
-				os.system('sudo reboot')
+			Reboot(_OS_)
 			break
