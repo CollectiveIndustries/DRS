@@ -2,12 +2,37 @@
 
 ## Include Files Here
 import os
+from sys import platform
 
+
+## OS Specific Stuff
+def GetOS():
+    _SystemOS_ = platform.strip()
+    if (_SystemOS_ == 'linux' or _SystemOS_ == 'linux2'):
+    # linux
+        with open('/etc/os-release') as file:
+            oper = file.readlines()
+            oper = oper[5].split('=')
+            return oper[1].strip() # Grab OS release Name we want to know what flavor of lenny we use.
+    elif(_SystemOS_ == 'win32'):
+        return _SystemOS_
+
+
+def OSClear(osname):
+    if(osname == "win32"):
+        os.system("cls")
+    else: # well its not Windows we can just "clear"
+        os.system("clear")
+
+def OsInput(prompt, os):
+    if(os == "win32"):
+        return input(prompt)
+    elif(os == "debian"):
+        return raw_input(prompt)
 
 ## Functions
-
 def colorPrint(txt,colorStart):
-	print colorStart+txt+'\033[0m' # Print in color then reset color on end of line.
+	print(colorStart+txt+'\033[0m') # Print in color then reset color on end of line.
 
 # Text output color definitions
 class color:
@@ -47,39 +72,36 @@ class switch(object):
 # Variable definistions
 Question = None
 
+_OS_ = GetOS()
+
 while Question is None:
-	os.system("clear")
-	colorPrint("Diagnostic and Recovery Programs",color.HEADER)
-	print "(A) GsmartControl - Harddrive Diagnostics."
-	print "(B) Ddrescue - Hard drive recovery + sector cloning."
-	print "(C) Rsync - Backup file systems to drive or server."
-#	print "(D) Chntpw - Offline Windows password reset."
+    OSClear(_OS_)
 
-	print "\n(Q) Quit - Closes terminal window"
-	print "(S) Shutdown - Shuts down system"
-	print "(R) Reboot - Reboot system"
+    colorPrint("Diagnostic and Recovery Programs",color.HEADER)
+    print("(A) GsmartControl - Harddrive Diagnostics.")
+    print("(B) Ddrescue - Hard drive recovery + sector cloning.")
+    print("(C) Rsync - Backup file systems to drive or server.")
+    print("(D) Chntpw - Offline Windows password reset.")
+    print("\n--------------------------------------------------------\n")
+    print("(Q) Quit - Closes terminal window")
+    print("(S) Shutdown - Shuts down system")
+    print("(R) Reboot - Reboot system")
 
 
-	for case in switch(raw_input('Select: ')):
-		if case("A"): pass
-		if case("a"):
-			print("Running gsmart hdd diagnostics.")
-			break
-		if case("B"): pass
-		if case("b"):
-			print("Calling ddrescue.")
-			break
-		if case("C"): pass
-		if case("c"):
-			print("Running rsync backup.")
-		if case("Q"): pass
-		if case("q"):
-			break
-		if case("S"): pass
-		if case("s"):
-			print("Shutting down system")
-			break
-		if case("R"): pass
-		if case("r"):
-			print("Rebooting system")
-			break
+    for case in switch(OsInput("Select: ",_OS_).lower()):
+        if case("a"):
+            print("Running gsmart hdd diagnostics.")
+            break
+        if case("b"):
+            print("Calling ddrescue.")
+            break
+        if case("c"):
+            print("Running rsync backup.")
+        if case("q"):
+            break
+        if case("s"):
+            print("Shutting down system")
+            break
+        if case("r"):
+            print("Rebooting system")
+        break
