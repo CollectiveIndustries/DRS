@@ -56,6 +56,7 @@ MyOS = com._OS_()
 while Question is None:
     MyOS.Clear()
 
+    print("OS Detected: {}".format(MyOS.FormatName())
     colorPrint("Diagnostic and Recovery Programs",color.HEADER)
     print("(A) GsmartControl - Harddrive Diagnostics.")
     print("(B) Ddrescue - Hard drive recovery + sector cloning.")

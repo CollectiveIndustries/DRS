@@ -3,8 +3,9 @@
     "",
     "\\Fddrescue",
     "\\lib",
-    "\\support_scripts"
+    "\\support_scripts",
+    "\\webmin_install"
   ],
-  "SelectedNode": "\\lib\\dbcon.py",
+  "SelectedNode": "\\webmin_install",
   "PreviewInSolutionExplorer": false
 }
