@@ -2,8 +2,9 @@
   "ExpandedNodes": [
     "",
     "\\Fddrescue",
-    "\\Fddrescue\\module"
+    "\\Fddrescue\\module",
+    "\\support_scripts"
   ],
-  "SelectedNode": "\\Fddrescue\\module\\com.py",
+  "SelectedNode": "\\.gitignore",
   "PreviewInSolutionExplorer": false
 }

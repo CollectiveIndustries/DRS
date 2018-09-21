@@ -1,10 +1,10 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 ## Include Files Here
 from sys import platform
 import time
 import os
-from Fddrescue.module import _OS_
+#from Fddrescue.module import _OS_
 
 
 
