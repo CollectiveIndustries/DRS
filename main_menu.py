@@ -115,26 +115,25 @@ while Question is None:
     print("(S) Shutdown - Shuts down system")
     print("(R) Reboot - Reboot system")
 
-
-	for case in switch(OsInput("Select: ",_OS_).lower()):
-		if case("a"):
-			print("Running gsmart hdd diagnostics.")
-			time.sleep(_sleep_)
-			break
-		if case("b"):
-			print("Calling ddrescue.")
-			time.sleep(_sleep_)
-			break
-		if case("c"):
-			print("Running rsync backup.")
-			time.sleep(_sleep_)
-		if case("q"):
-			break
-		if case("s"):
-			print("Shutting down system")
-			time.sleep(_sleep_)
-			break
-		if case("r"):
-			print("Rebooting system")
-			time.sleep(_sleep_)
-			break
+    for case in switch(OsInput("Select: ",_OS_).lower()):
+        if case("a"):
+            print("Running gsmart hdd diagnostics.")
+            time.sleep(_sleep_)
+            break
+        if case("b"):
+            print("Calling ddrescue.")
+            time.sleep(_sleep_)
+            break
+        if case("c"):
+            print("Running rsync backup.")
+            time.sleep(_sleep_)
+        if case("q"):
+            break
+        if case("s"):
+            print("Shutting down system")
+            time.sleep(_sleep_)
+            break
+        if case("r"):
+            print("Rebooting system")
+            time.sleep(_sleep_)
+            break
