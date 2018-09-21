@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
 ## Include Files Here
-from sys import platform
+
 import time
 import os
-#from Fddrescue.module import _OS_
+from lib import com
 
 
 
@@ -51,7 +51,7 @@ class switch(object):
 # Variable definistions
 Question = None
 _sleep_ = 5
-MyOS = _OS_()
+MyOS = com._OS_()
 
 while Question is None:
     MyOS.Clear()
