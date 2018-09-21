@@ -67,7 +67,7 @@ while Question is None:
     print("(R) Reboot - Reboot system (warm boot)")
     print("")
 
-    for case in switch(MyOS.Input("Select: ").lower()):
+    for case in switch(input("Select: ").lower()):
         if case("a"):
             print("Running gsmart hdd diagnostics.")
             time.sleep(_sleep_)
