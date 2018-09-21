@@ -7,29 +7,43 @@ import os
 
 
 ## OS Specific Stuff
-def GetOS():
-    _SystemOS_ = platform.strip()
-    if (_SystemOS_ == 'linux' or _SystemOS_ == 'linux2'):
-    # linux
-        with open('/etc/os-release') as file:
-            oper = file.readlines()
-            oper = oper[5].split('=')
-            return oper[1].strip() # Grab OS release Name we want to know what flavor of lenny we use.
-    elif(_SystemOS_ == 'win32'):
-        return _SystemOS_
+class _OS_(object):
+    def __init__(self):
+        _SystemOS_ = platform.strip()
+        if (_SystemOS_ == 'linux' or _SystemOS_ == 'linux2'):
+        # linux
+            with open('/etc/os-release') as file:
+                oper = file.readlines()
+                oper = oper[5].split('=')
+                self._type_ = oper[1].strip() # Grab OS release Name we want to know what flavor of lenny we use.
+        elif(_SystemOS_ == 'win32'):
+            self._type_ = _SystemOS_
+        
+    def Clear(self):
+        if(self._type_ == "win32"):
+            os.system("cls")
+        else: # well its not Windows we can just "clear"
+            os.system("clear")
 
+    def Input(self, prompt):
+        if(self._type_ == "win32"):
+            return input(prompt)
+        elif(self._type_ == "debian"):
+            return raw_input(prompt)
 
-def OSClear(osname):
-    if(osname == "win32"):
-        os.system("cls")
-    else: # well its not Windows we can just "clear"
-        os.system("clear")
+    def Shutdown(self):
+        if(_OS_._type_ == 'win32'):
+            os.system('shutdown', '/s')
+        elif(_OS_._type_ == 'debian'):
+            os.system('sudo shutdown -h')
 
-def OsInput(prompt, os):
-    if(os == "win32"):
-        return input(prompt)
-    elif(os == "debian"):
-        return raw_input(prompt)
+    def Reboot(self):
+        if(_OS_._type_ == 'win32'):
+            os.system('shutdown', '/r')
+        elif(_OS_._type_ == 'debian'):
+            os.system('sudo reboot')
+
+            ## END OF _OS_ CLASS
 
 ## Functions
 def colorPrint(txt,colorStart):
@@ -46,46 +60,7 @@ class color:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
-## OS Specific Stuff
-def GetOS():
-    _SystemOS_ = platform.strip()
-    if (_SystemOS_ == 'linux' or _SystemOS_ == 'linux2'):
-    # linux
-        with open('/etc/os-release') as file:
-            oper = file.readlines()
-            oper = oper[5].split('=')
-            return oper[1].strip() # Grab OS release Name we want to know what flavor of lenny we use.
-    elif(_SystemOS_ == 'win32'):
-        return _SystemOS_
-        
-def OSClear(osname):
-    if(osname == "win32"):
-        os.system("cls")
-    else: # well its not Windows we can just "clear"
-        os.system("clear")
-        
-def OsInput(prompt, _os_):
-    if(_os_ == "win32"):
-        return input(prompt)
-    elif(_os_ == "debian"):
-        return raw_input(prompt)
-   
-def Shutdown(os):
-	if(_OS_ == 'win32'):
-		# Windows shutdown command
-		os.system('shutdown', '/s')
-	elif(_OS_ == 'debian'):
-		# Debian shutdown command
-		os.system('sudo shutdown -h')
-		
-def Reboot(os):
-	if(_OS_ == 'win32'):
-		# Windows reboot command
-		os.system('shutdown', '/r')
-	elif(_OS_ == 'debian'):
-		# Debian reboot command
-		os.system('sudo reboot')
-		
+
 # This class provides the functionality we want. You only need to look at
 # this if you want to know how this works. It only needs to be defined
 # once, no need to muck around with its internals.
@@ -112,11 +87,11 @@ class switch(object):
 
 # Variable definistions
 Question = None
-_OS_ = GetOS()
 _sleep_ = 5
+MyOS = _OS_()
 
 while Question is None:
-    OSClear(_OS_)
+    MyOS.Clear()
 
     colorPrint("Diagnostic and Recovery Programs",color.HEADER)
     print("(A) GsmartControl - Harddrive Diagnostics.")
@@ -125,10 +100,11 @@ while Question is None:
     print("(D) Chntpw - Offline Windows password reset.")
     print("\n--------------------------------------------------------\n")
     print("(Q) Quit - Closes terminal window")
-    print("(S) Shutdown - Shuts down system")
-    print("(R) Reboot - Reboot system")
+    print("(S) Shutdown - Power down system")
+    print("(R) Reboot - Reboot system (warm boot)")
+    print("")
 
-    for case in switch(OsInput("Select: ",_OS_).lower()):
+    for case in switch(MyOS.Input("Select: ").lower()):
         if case("a"):
             print("Running gsmart hdd diagnostics.")
             time.sleep(_sleep_)
@@ -140,15 +116,20 @@ while Question is None:
         if case("c"):
             print("Running rsync backup.")
             time.sleep(_sleep_)
+            break
+        if case("d"):
+            print("Starting Offline Regedit.")
+            time.sleep(_sleep_)
+            break
         if case("q"):
-            exit(self,0)
+            exit(0)
         if case("s"):
             print("Shutting down system")
             time.sleep(_sleep_)
-            ShutDown(_OS_)
+            MyOS.Shutdown()
             break
         if case("r"):
             print("Rebooting system")
             time.sleep(_sleep_)
-            Reboot(_OS_)
+            MyOS.Shutdown()
             break
