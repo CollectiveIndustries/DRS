@@ -78,14 +78,14 @@ _sleep_ = 5
 while Question is None:
 	OSClear(_OS_)
 	colorPrint("Diagnostic and Recovery Programs",color.HEADER)
-	print "(A) GsmartControl - Harddrive Diagnostics."
-	print "(B) Ddrescue - Hard drive recovery + sector cloning."
-	print "(C) Rsync - Backup file systems to drive or server."
-	print "(D) Chntpw - Offline Windows password reset."
-	print "\n----------------------------------------------------------"
-	print "\n(Q) Quit - Closes terminal window"
-	print "(S) Shutdown - Shuts down system"
-	print "(R) Reboot - Reboot system"
+	print ("(A) GsmartControl - Harddrive Diagnostics.")
+	print ("(B) Ddrescue - Hard drive recovery + sector cloning.")
+	print ("(C) Rsync - Backup file systems to drive or server.")
+	print ("(D) Chntpw - Offline Windows password reset.")
+	print ("\n----------------------------------------------------------\n")
+	print ("(Q) Quit - Closes terminal window")
+	print ("(S) Shutdown - Shuts down system")
+	print ("(R) Reboot - Reboot system")
 	
 
 	for case in switch(OsInput("Select: ",_OS_).lower()):
@@ -105,8 +105,18 @@ while Question is None:
 		if case("s"):
 			print("Shutting down system")
 			time.sleep(_sleep_)
+			if(_OS_ == 'win32'):
+				# windows shutdown command
+				os.system('shutdown', '/s')
+			elif(_OS_ == 'debian'):
+				os.system('sudo shutdown -h')
 			break
 		if case("r"):
 			print("Rebooting system")
 			time.sleep(_sleep_)
+			if(_OS_ == 'win32'):
+				# windows shutdown command
+				os.system('shutdown', '/r')
+			elif(_OS_ == 'debian'):
+				os.system('sudo reboot')
 			break
