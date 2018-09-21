@@ -1,6 +1,9 @@
 {
   "ExpandedNodes": [
-    ""
+    "",
+    "\\Fddrescue",
+    "\\Fddrescue\\module"
   ],
+  "SelectedNode": "\\Fddrescue\\module\\com.py",
   "PreviewInSolutionExplorer": false
 }

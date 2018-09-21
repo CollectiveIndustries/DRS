@@ -4,46 +4,9 @@
 from sys import platform
 import time
 import os
+from Fddrescue.module import _OS_
 
 
-## OS Specific Stuff
-class _OS_(object):
-    def __init__(self):
-        _SystemOS_ = platform.strip()
-        if (_SystemOS_ == 'linux' or _SystemOS_ == 'linux2'):
-        # linux
-            with open('/etc/os-release') as file:
-                oper = file.readlines()
-                oper = oper[5].split('=')
-                self._type_ = oper[1].strip() # Grab OS release Name we want to know what flavor of lenny we use.
-        elif(_SystemOS_ == 'win32'):
-            self._type_ = _SystemOS_
-        
-    def Clear(self):
-        if(self._type_ == "win32"):
-            os.system("cls")
-        else: # well its not Windows we can just "clear"
-            os.system("clear")
-
-    def Input(self, prompt):
-        if(self._type_ == "win32"):
-            return input(prompt)
-        elif(self._type_ == "debian"):
-            return raw_input(prompt)
-
-    def Shutdown(self):
-        if(_OS_._type_ == 'win32'):
-            os.system('shutdown', '/s')
-        elif(_OS_._type_ == 'debian'):
-            os.system('sudo shutdown -h')
-
-    def Reboot(self):
-        if(_OS_._type_ == 'win32'):
-            os.system('shutdown', '/r')
-        elif(_OS_._type_ == 'debian'):
-            os.system('sudo reboot')
-
-            ## END OF _OS_ CLASS
 
 ## Functions
 def colorPrint(txt,colorStart):
