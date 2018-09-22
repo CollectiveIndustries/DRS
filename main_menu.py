@@ -14,20 +14,43 @@ def colorPrint(txt,colorStart):
 _sleep_ = 5
 MyOS = com._OS_()
 
+
+## Menu dictionaries
+MainMenu_Items = {"1":["GsmartControl","Harddrive Diagnostics."],
+            "2":["GNU ddrescue","Hard drive recovery + sector cloning."],
+            "3":["Rsync","Backup file systems to drive or server."],
+            "4":["Chntpw","Offline Windows password reset."],
+            "-1":["\n--------------------------------------------------------\n"],
+            "Q":["Quit","Closes terminal window"],
+            "S":["Shutdown","Power down System"],
+            "R":["Reboot","Reboot system (warm boot)"]}
+
+# Print Menu method with list of options as input
+class Menu(object):
+    _menuformatstring_ = "[{}] {} - {}"
+    _items_ = {}
+
+    def __init__(self,_items_=None):
+        if _items_ is None:
+            self._items_ = {}
+        else:
+            self._items_ = _items_
+
+    def Print(self):
+        for option, text in self._items_.items():
+            if option != "-1":
+                print(self._menuformatstring_.format(option,text[0],text[1]))
+            else:
+                print(text[0])
+
+colorPrint("Diagnostic and Recovery Programs",com.color.HEADER)
+MainMenu = Menu(MainMenu_Items)
+
 while True:
     MyOS.Clear()
 
     print("OS Detected: {}".format(MyOS.FormatName()))
-    colorPrint("Diagnostic and Recovery Programs",com.color.HEADER)
-    print("(A) GsmartControl - Harddrive Diagnostics.")
-    print("(B) Ddrescue - Hard drive recovery + sector cloning.")
-    print("(C) Rsync - Backup file systems to drive or server.")
-    print("(D) Chntpw - Offline Windows password reset.")
-    print("\n--------------------------------------------------------\n")
-    print("(Q) Quit - Closes terminal window")
-    print("(S) Shutdown - Power down system")
-    print("(R) Reboot - Reboot system (warm boot)")
-    print("")
+    MainMenu.Print()
 
     for case in com.switch(input("Select: ").lower()):
         if case("a"):
