@@ -19,10 +19,6 @@
     <VisualStudioVersion Condition=" '$(VisualStudioVersion)' == '' ">10.0</VisualStudioVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Content Include="conf\deluge\icons\ubuntu.com.png" />
-    <Content Include="conf\gtk-2.0\gtkfilechooser.ini" />
-    <Content Include="conf\mc\panels.ini" />
-    <Content Include="conf\totem\state.ini" />
     <Content Include="reginfo.txt" />
   </ItemGroup>
   <ItemGroup>
@@ -40,12 +36,6 @@
     <Compile Include="main_menu.py" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="conf\" />
-    <Folder Include="conf\deluge\" />
-    <Folder Include="conf\deluge\icons" />
-    <Folder Include="conf\gtk-2.0" />
-    <Folder Include="conf\mc" />
-    <Folder Include="conf\totem" />
     <Folder Include="Fddrescue" />
     <Folder Include="lib" />
   </ItemGroup>
