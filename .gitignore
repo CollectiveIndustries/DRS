@@ -3,3 +3,5 @@
 *.orig
 *.suo
 .vs/DRS/v15/.suo
+__pycache__\*
+__pycache__
