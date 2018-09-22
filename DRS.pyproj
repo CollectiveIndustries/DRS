@@ -26,7 +26,6 @@
     <Content Include="reginfo.txt" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="demo.py" />
     <Compile Include="fddrescue.py" />
     <Compile Include="Fddrescue\ExcludeConvert.py" />
     <Compile Include="Fddrescue\fddrescue.py" />
