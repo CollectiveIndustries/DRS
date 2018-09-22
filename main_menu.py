@@ -11,11 +11,10 @@ def colorPrint(txt,colorStart):
 	print(colorStart+txt+'\033[0m') # Print in color then reset color on end of line.
 
 # Variable definistions
-Question = None
 _sleep_ = 5
 MyOS = com._OS_()
 
-while Question is None:
+while True:
     MyOS.Clear()
 
     print("OS Detected: {}".format(MyOS.FormatName()))
