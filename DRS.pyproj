@@ -25,7 +25,7 @@
     <Compile Include="fddrescue.py" />
     <Compile Include="Fddrescue\ExcludeConvert.py" />
     <Compile Include="Fddrescue\fddrescue.py" />
-    <Compile Include="Fddrescue\rescue.py" />
+    <Compile Include="rescue.py" />
     <Compile Include="Fddrescue\sync.py" />
     <Compile Include="Fddrescue\test.py" />
     <Compile Include="lib\com.py" />
