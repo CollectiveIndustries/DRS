@@ -2,7 +2,6 @@
 
 # Python script to set variables and call ddrescue.
 
-import ctypes
 import os, sys
 import shlex
 import json
@@ -34,8 +33,8 @@ def doMount():
         print(com.color.FAIL+"ERROR while mounting "+RescueMount[3]+'\nReturned with Error:\n>>>> '+str(ERROR)+com.color.END)
         exit(ERROR.returncode)
 
-class Rescue(object):
-    """Defines a Recovery Object"""
+class Recovery(object):
+    """Defines a Recovery Environment Object"""
     _today_ = date.today().strftime("%m-%d-%y")
     _logfmtstr_ = "RecoveryLog_{}-{}_{}_{}.frds" # RecoveryLog_LastName-FirstName_M-D-Y_TI.frds
 
@@ -96,11 +95,11 @@ class Rescue(object):
     
         UserOptions['skip-size'] = input("{}Skip Size (min,max):{} [ {} ] ".format(com.color.HEADER, com.color.END,self._GetConfig('skip-size')))
         UserOptions['cluster-size'] = input("{}Cluster Size:{} [ {} ] ".format(com.color.HEADER, com.color.END,self._GetConfig('cluster-size')))
-        
         while True:
-            UserOptions['TechInitials'] = input("{}Technitian Initals:{} [ {} ] ".format(com.color.HEADER, com.color.END,self._GetConfig('TechInitials'))).upper()
+            UserOptions['TechInitials'] = input("{}Technitian Initals:{} [ {} ] ".format(com.color.HEADER, com.color.END,self._GetConfig('TechInitials'))).upper() ## self._config_['TechInitials'] is being set instead of UserOptions
             if UserOptions['TechInitials'] != "":
                 break
+            UserOptions['TechInitials'] = None
             print("{}Initials cannot be empty{}".format(com.color.FAIL,com.color.END))
 
 
@@ -146,10 +145,10 @@ def rescue():
 # Clear screen
         
         os.system("clear")
-        myobject = Rescue()
+        RecoveryEnvironment = Recovery()
         
-        UserOptions = myobject.GetConfigFromUser()
-        UserOptions['LogFile'] = myobject.GetLogName()
+        UserOptions = RecoveryEnvironment.GetConfigFromUser()
+        UserOptions['LogFile'] = RecoveryEnvironment.GetLogName()
         
 
 
