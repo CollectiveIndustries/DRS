@@ -22,7 +22,7 @@ NtfsFix = ['ntfsfix', '--clear-bad-sectors', '--clean-dirty']
 
     # Make Directory Path just incase it doesnt exist
 MkDir = ['mkdir','-p']
-FSIgnore = ['iso9660', 'squashfs']
+
 
 def doMount():
     try:
@@ -56,11 +56,13 @@ class Rescue(object):
     def __init__(self, *args, **kwargs):
         return super().__init__(*args, **kwargs)
 
-    def _DisplayConfigChanges(self,_newConf_):
+    def _DisplayConfigChanges(self,_newConf_={}):
         """Prints out a side by side view of the configuration settings"""
-        _frmtstr_ = "{} {} --> {} {}"
+        _frmtstr_ = "{}: {} --> {}"
         for k,v in self._config_.items():
-            print(_frmtstr_.format( k,v,1,2 ) )
+            for _k_, _v_ in _newConf_.items():
+                if k == _k_:
+                    print(_frmtstr_.format( k,v,_v_) )
 
     def GetLogName(self):
         """Returns formated log name"""
@@ -94,7 +96,13 @@ class Rescue(object):
     
         UserOptions['skip-size'] = input("{}Skip Size (min,max):{} [ {} ] ".format(com.color.HEADER, com.color.END,self._GetConfig('skip-size')))
         UserOptions['cluster-size'] = input("{}Cluster Size:{} [ {} ] ".format(com.color.HEADER, com.color.END,self._GetConfig('cluster-size')))
-        UserOptions['TechInitials'] = input("{}Technitian Initals:{} [ {} ] ".format(com.color.HEADER, com.color.END,self._GetConfig('TechInitials')))
+        
+        while True:
+            UserOptions['TechInitials'] = input("{}Technitian Initals:{} [ {} ] ".format(com.color.HEADER, com.color.END,self._GetConfig('TechInitials'))).upper()
+            if UserOptions['TechInitials'] != "":
+                break
+            print("{}Initials cannot be empty{}".format(com.color.FAIL,com.color.END))
+
 
         self._DisplayConfigChanges(UserOptions)
 
@@ -112,25 +120,25 @@ def DoRescue(LogFile, RecoverDisk, TargetDisk, _DD_OPTIONS_):
     except:
         print("Error trying to call rescue")
 
-def PrintLSBLK():
-       lsblk = Popen(block_list, stdout=PIPE, stderr=PIPE)
-       out, err = lsblk.communicate()
-       try:
-           decoded = json.loads(out)
+def PrintDevices():
+    FSIgnore = ['iso9660', 'squashfs']
+    print(com.color.BOLD+"\nAttached Storage Devices.\n"+com.color.END)
+    lsblk = Popen(block_list, stdout=PIPE, stderr=PIPE)
+    out, err = lsblk.communicate()
+    try:
+        decoded = json.loads(out)
+        for x in decoded['blockdevices']:
+            if x['fstype'] not in FSIgnore: # Make sure we list only valid drives and are NOT in the Ignore list
+                print(com.color.HEADER+"Drive:  "+com.color.OKGREEN+"/dev/"+x['name']+com.color.END)
+                print(com.color.HEADER+"Size:   "+com.color.WARNING+x['size']+com.color.END)
+            if x['model'] is not None:
+                print(com.color.HEADER+"Model:  "+com.color.END+x['model'])
+            if x['serial'] is not None:
+                print(com.color.HEADER+"Serial: "+com.color.END+x['serial'])
+                print("") # add a blank line at the end of each group as some values may not print
     
-    # Access data
-           for x in decoded['blockdevices']:
-               if x['fstype'] not in FSIgnore: # Make sure we list only valid drives and are NOT in the Ignore list
-                   print(com.color.HEADER+"Drive:  "+com.color.OKGREEN+"/dev/"+x['name']+com.color.END)
-                   print(com.color.HEADER+"Size:   "+com.color.WARNING+x['size']+com.color.END)
-               if x['model'] is not None:
-                   print(com.color.HEADER+"Model:  "+com.color.END+x['model'])
-               if x['serial'] is not None:
-                   print(com.color.HEADER+"Serial: "+com.color.END+x['serial'])
-               print("") # add a blank line at the end of each group as some values may not print
-    
-       except (ValueError, KeyError, TypeError):
-           print("lsblk returned the wrong JSON format")
+    except (ValueError, KeyError, TypeError):
+        print("lsblk returned the wrong JSON format")
 
 
 
@@ -139,9 +147,6 @@ def rescue():
         
         os.system("clear")
         myobject = Rescue()
-
-        print(com.color.BOLD+"\nAttached Storage Devices.\n"+com.color.END)
-        
         
         UserOptions = myobject.GetConfigFromUser()
         UserOptions['LogFile'] = myobject.GetLogName()
