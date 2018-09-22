@@ -76,16 +76,19 @@ class Rescue(object):
 
     def GetConfigFromUser(self):
         """Gets data from user to define recovery environment"""
+        confirm = "{}Using Target{} \"{}\" Are you sure (y/n)?"
         UserOptions = self._config_
+        UserOptions['TargetDisk'] = ''
 
         UserOptions['RecoveryDisk'] = input("{}Disk to recover (defualt marked in []):{} [ {} ] ".format(com.color.HEADER, com.color.END,self.GetConfig('RecoveryDisk')))
-        UserOptions['TargetDisk'] = self.GetConfig('TargetDisk')
     
-        while UserOptions['TargetDisk'] is None:
+        while True:
             UserOptions['TargetDisk'] = input("{}Target Drive:{} [ {} ] ".format(com.color.HEADER, com.color.END,self.GetConfig('TargetDisk')))
-            response = input("{}Using Disk{} \"{}\" are you sure (y/n)?".format(com.color.WARNING, UserOptions['TargetDisk']).lower(),com.color.END)
-            if response != "y" and response is not None:
-                UserOptions['TargetDisk'] = None
+
+            if UserOptions['TargetDisk'] == "":
+                print("{}Target cannot be empty{}".format(com.color.FAIL,com.color.END))
+            elif input(confirm.format(com.color.WARNING, com.color.END, UserOptions['TargetDisk'])) == "y":
+                break
     
         print("\nThe following numbers may be in decimal, hexadecimal or octal, and may be followed by\na multiplier: s = sectors, k = 1000, Ki = 1024, M = 10^6,  Mi  =  2^20, etc")
     
