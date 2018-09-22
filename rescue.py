@@ -50,7 +50,7 @@ class Rescue(object):
               'RecoveryDisk':'/dev/sda',
               'TargetDisk':None,
               'LogPath':'/media/data/DDRescue_Logs',
-              'LogFile':None
+              'LogFile':''
               }
 
     def __init__(self, *args, **kwargs):
@@ -59,12 +59,12 @@ class Rescue(object):
     def _DisplayConfigChanges(self,_newConf_):
         """Prints out a side by side view of the configuration settings"""
         _frmtstr_ = "{} {} --> {} {}"
-        for k,v in self._config_:
+        for k,v in self._config_.items():
             print(_frmtstr_.format( k,v,1,2 ) )
 
     def GetLogName(self):
         """Returns formated log name"""
-        return self._logfmtstr_.format(self.GetConfig('CustomerLastName'),self.GetConfig('CustomerFirstName'),self._today_,self.GetConfig(TechInitials))
+        return self._logfmtstr_.format(self._GetConfig('CustomerLastName'),self._GetConfig('CustomerFirstName'),self._today_,self._GetConfig('TechInitials'))
 
     def SetConfig(self,name,value):
         """Saves value to name"""
@@ -80,10 +80,10 @@ class Rescue(object):
         UserOptions = self._config_
         UserOptions['TargetDisk'] = ''
 
-        UserOptions['RecoveryDisk'] = input("{}Disk to recover (defualt marked in []):{} [ {} ] ".format(com.color.HEADER, com.color.END,self.GetConfig('RecoveryDisk')))
+        UserOptions['RecoveryDisk'] = input("{}Disk to recover (defualt marked in []):{} [ {} ] ".format(com.color.HEADER, com.color.END,self._GetConfig('RecoveryDisk')))
     
         while True:
-            UserOptions['TargetDisk'] = input("{}Target Drive:{} [ {} ] ".format(com.color.HEADER, com.color.END,self.GetConfig('TargetDisk')))
+            UserOptions['TargetDisk'] = input("{}Target Drive:{} [ {} ] ".format(com.color.HEADER, com.color.END,self._GetConfig('TargetDisk')))
 
             if UserOptions['TargetDisk'] == "":
                 print("{}Target cannot be empty{}".format(com.color.FAIL,com.color.END))
@@ -92,15 +92,15 @@ class Rescue(object):
     
         print("\nThe following numbers may be in decimal, hexadecimal or octal, and may be followed by\na multiplier: s = sectors, k = 1000, Ki = 1024, M = 10^6,  Mi  =  2^20, etc")
     
-        UserOptions['skip-size'] = input("{}Skip Size (min,max):{} [ {} ] ".format(com.color.HEADER, com.color.END,self.GetConfig('skip-size')))
-        UserOptions['cluster-size'] = input("{}Cluster Size:{} [ {} ] ".format(com.color.HEADER, com.color.END,self.GetConfig('cluster-size')))
-        UserOptions['TechInitials'] = input("{}Technitian Initals:{} [ {} ] ".format(com.color.HEADER, com.color.END,self.GetConfig('TechInitials')))
+        UserOptions['skip-size'] = input("{}Skip Size (min,max):{} [ {} ] ".format(com.color.HEADER, com.color.END,self._GetConfig('skip-size')))
+        UserOptions['cluster-size'] = input("{}Cluster Size:{} [ {} ] ".format(com.color.HEADER, com.color.END,self._GetConfig('cluster-size')))
+        UserOptions['TechInitials'] = input("{}Technitian Initals:{} [ {} ] ".format(com.color.HEADER, com.color.END,self._GetConfig('TechInitials')))
 
         self._DisplayConfigChanges(UserOptions)
 
-        #return UserOptions
+        return UserOptions
 
-    def GetConfig(self,name):
+    def _GetConfig(self,name):
         """Gets value by name"""
         return self._config_[name]
 
@@ -141,20 +141,17 @@ def rescue():
         myobject = Rescue()
 
         print(com.color.BOLD+"\nAttached Storage Devices.\n"+com.color.END)
-# Search for disks
-#        grep = Popen(['grep','Disk /dev'], stdin=PIPE, stdout=PIPE)
-#        fdisk = Popen('fdisk -l'.split(), stdout=grep.stdin)
         
         
         UserOptions = myobject.GetConfigFromUser()
-
         UserOptions['LogFile'] = myobject.GetLogName()
+        
 
 
         print("\n"+com.color.HEADER+"Recovery type:"+com.color.END+"\nA) Full (runs 3 copy passes, trim, and scrape)\nB) No Scrape (Copy X3, trim)\nC) No Trim (just the copy passes)\nD) Clone (copy pass 1 with a larger read size)\n\nR) Restart\nQ) Quit")
 	# Empty suites are considered syntax errors, so intentional fall-throughs
 	# should contain 'pass'
-        for case in switch(input('Recovery Type []: ').lower()):
+        for case in com.switch(input('Recovery Type []: ').lower()):
             print("\n\n") # padd down a few lines then print selected options.
             if case('a'): # Full recovery
 			#
