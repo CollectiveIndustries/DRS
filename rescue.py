@@ -23,7 +23,7 @@ NtfsFix = ['ntfsfix', '--clear-bad-sectors', '--clean-dirty']
 MkDir = ['mkdir','-p']
 
 
-def doMount():
+def doMount(): # Needs refactoring (move to class Recovery()
     try:
         print("Mounting Storage Server....")
         err = check_output(RescueMount)
@@ -37,6 +37,7 @@ class Recovery(object):
     """Defines a Recovery Environment Object"""
     _today_ = date.today().strftime("%m-%d-%y")
     _logfmtstr_ = "RecoveryLog_{}-{}_{}_{}.frds" # RecoveryLog_LastName-FirstName_M-D-Y_TI.frds
+    _FSIgnore_ = ['iso9660', 'squashfs']
 
     _recoveryType_ = {'full':['reopen-on-error', '--idirect', '--odirect', '--force', '--verbose']
                       }
@@ -75,33 +76,46 @@ class Recovery(object):
         """Saves the user settings"""
         self._config_ = _newConfig_
 
+    def GetInputNonEmpty(self, name):
+        option = None
+        while True:
+            option = input("{}{}:{} [ ] ".format(com.color.HEADER,name, com.color.END))
+            if option != "":
+                return option
+            option = None
+            print("{}{} cannot be empty!{}".format(com.color.FAIL,name,com.color.END))
+
+    def Confirm(self, prompt, option):
+        confirm = "{}{}{} \"{}\" Are you sure (y/n)?"
+        answer = ""
+        answer = input(confirm.format(com.color.WARNING, prompt, com.color.END, option)).lower()
+        if answer == "y":
+            return True
+        else:
+            return False
+
     def GetConfigFromUser(self):
         """Gets data from user to define recovery environment"""
-        confirm = "{}Using Target{} \"{}\" Are you sure (y/n)?"
+        
         UserOptions = self._config_
-        UserOptions['TargetDisk'] = ''
 
         UserOptions['RecoveryDisk'] = input("{}Disk to recover (defualt marked in []):{} [ {} ] ".format(com.color.HEADER, com.color.END,self._GetConfig('RecoveryDisk')))
-    
-        while True:
-            UserOptions['TargetDisk'] = input("{}Target Drive:{} [ {} ] ".format(com.color.HEADER, com.color.END,self._GetConfig('TargetDisk')))
-
-            if UserOptions['TargetDisk'] == "":
-                print("{}Target cannot be empty{}".format(com.color.FAIL,com.color.END))
-            elif input(confirm.format(com.color.WARNING, com.color.END, UserOptions['TargetDisk'])) == "y":
-                break
     
         print("\nThe following numbers may be in decimal, hexadecimal or octal, and may be followed by\na multiplier: s = sectors, k = 1000, Ki = 1024, M = 10^6,  Mi  =  2^20, etc")
     
         UserOptions['skip-size'] = input("{}Skip Size (min,max):{} [ {} ] ".format(com.color.HEADER, com.color.END,self._GetConfig('skip-size')))
         UserOptions['cluster-size'] = input("{}Cluster Size:{} [ {} ] ".format(com.color.HEADER, com.color.END,self._GetConfig('cluster-size')))
-        while True:
-            UserOptions['TechInitials'] = input("{}Technitian Initals:{} [ {} ] ".format(com.color.HEADER, com.color.END,self._GetConfig('TechInitials'))).upper() ## self._config_['TechInitials'] is being set instead of UserOptions
-            if UserOptions['TechInitials'] != "":
-                break
-            UserOptions['TechInitials'] = None
-            print("{}Initials cannot be empty{}".format(com.color.FAIL,com.color.END))
 
+        
+        UserOptions['TargetDisk'] = self.GetInputNonEmpty("Target Disk")
+
+        while not self.Confirm("Target Disk", UserOptions['TargetDisk']):
+            UserOptions['TargetDisk'] = self.GetInputNonEmpty("Target Disk")
+        
+        # Cannot be left blank these control the log file format
+        UserOptions['TechInitials'] = self.GetInputNonEmpty("Tech Initials")
+        UserOptions['CustomerLastName'] = self.GetInputNonEmpty("Customer Last Name")
+        UserOptions['CustomerFirstName'] = self.GetInputNonEmpty("Customer First Name")
 
         self._DisplayConfigChanges(UserOptions)
 
@@ -111,44 +125,42 @@ class Recovery(object):
         """Gets value by name"""
         return self._config_[name]
 
+    def DoRecovery(self):
+        """Calls ddrescue with the current configuration"""
+        try:
+            rescue = Popen([],  stderr=PIPE)
+        except:
+            print("Error trying to call rescue")
 
-
-def DoRescue(LogFile, RecoverDisk, TargetDisk, _DD_OPTIONS_):
-    try:
-        rescue = Popen(['ddrescue']+_DD_OPTIONS_+[RecoverDisk,TargetDisk,RescueLogPath+"/"+LogFile],  stderr=PIPE)
-    except:
-        print("Error trying to call rescue")
-
-def PrintDevices():
-    FSIgnore = ['iso9660', 'squashfs']
-    print(com.color.BOLD+"\nAttached Storage Devices.\n"+com.color.END)
-    lsblk = Popen(block_list, stdout=PIPE, stderr=PIPE)
-    out, err = lsblk.communicate()
-    try:
-        decoded = json.loads(out)
-        for x in decoded['blockdevices']:
-            if x['fstype'] not in FSIgnore: # Make sure we list only valid drives and are NOT in the Ignore list
-                print(com.color.HEADER+"Drive:  "+com.color.OKGREEN+"/dev/"+x['name']+com.color.END)
-                print(com.color.HEADER+"Size:   "+com.color.WARNING+x['size']+com.color.END)
-            if x['model'] is not None:
-                print(com.color.HEADER+"Model:  "+com.color.END+x['model'])
-            if x['serial'] is not None:
-                print(com.color.HEADER+"Serial: "+com.color.END+x['serial'])
-                print("") # add a blank line at the end of each group as some values may not print
+    def GetDevices(): # needs refactoring
+        """Get devices from lsblk"""
+        print(com.color.BOLD+"\nAttached Storage Devices.\n"+com.color.END)
+        lsblk = Popen(block_list, stdout=PIPE, stderr=PIPE)
+        out, err = lsblk.communicate()
+        try:
+            decoded = json.loads(out)
+            for x in decoded['blockdevices']:
+                if x['fstype'] not in self._FSignore_: # Make sure we list only valid drives and are NOT in the Ignore list
+                    print(com.color.HEADER+"Drive:  "+com.color.OKGREEN+"/dev/"+x['name']+com.color.END)
+                    print(com.color.HEADER+"Size:   "+com.color.WARNING+x['size']+com.color.END)
+                if x['model'] is not None:
+                    print(com.color.HEADER+"Model:  "+com.color.END+x['model'])
+                if x['serial'] is not None:
+                    print(com.color.HEADER+"Serial: "+com.color.END+x['serial'])
+                    print("") # add a blank line at the end of each group as some values may not print
     
-    except (ValueError, KeyError, TypeError):
-        print("lsblk returned the wrong JSON format")
-
+        except (ValueError, KeyError, TypeError):
+            print("lsblk returned the wrong JSON format")
 
 
 def rescue():
 # Clear screen
         
         os.system("clear")
-        RecoveryEnvironment = Recovery()
+        Task = Recovery()
         
-        UserOptions = RecoveryEnvironment.GetConfigFromUser()
-        UserOptions['LogFile'] = RecoveryEnvironment.GetLogName()
+        TaskOptions = Task.GetConfigFromUser()
+        TaskOptions['LogFile'] = Task.GetLogName()
         
 
 
