@@ -33,11 +33,12 @@ class Recovery(object):
     _recoveryType_ = {'full':['reopen-on-error', 'idirect', 'odirect', 'force', 'verbose'],
                       'noscrape':['reopen-on-error', 'idirect', 'odirect', 'force', 'verbose', 'no-scrape'],
                       'notrim':['reopen-on-error', 'idirect', 'odirect', 'force', 'verbose', 'no-scrape', 'no-trim'],
-                      'clone':['cpass=1', 'idirect', 'odirect', 'force', 'verbose', 'no-trim', 'no-scrape']
+                      'clone':['idirect', 'odirect', 'force', 'verbose', 'no-trim', 'no-scrape']
                       }
 
     _config_ = {'cluster-size':'1024',
               'skip-size':'128s,1M',
+              'cpass':'3',
               'CustomerFirstName':None,
               'CustomerLastName':None,
               'TechInitials':None,
@@ -46,6 +47,26 @@ class Recovery(object):
               'LogPath':'/media/data/DDRescue_Logs',
               'LogFile':''
               }
+
+    def Type(self,type='full'):
+        """Returns recovery options based on type.
+        full, noscrape, notrim, clone
+        """
+        frmtStrLng = "--{}={}"
+        frmtStrSrt = "--{}"
+        optLst = []
+
+        clusterSize = self._config_['cluster-size']
+        skipSize = self._config_['skip-size']
+        copyPass = self._config_['cpass']
+
+        for o in self._recoveryType_[type]:
+            optLst += [frmtStrSrt.format(o)]
+
+        if type == 'clone':
+            return [frmtStrLng.format("cluster-size",clusterSize),frmtStrLng.format("cpass","1")] + optLst
+        else:
+            return [frmtStrLng.format("cluster-size",clusterSize), frmtStrLng.format("skip-size",skipSize),frmtStrLng.format("cpass",copyPass) ] + optLst
 
     def doMount(): # Needs refactoring (move to class Recovery()
         try:
@@ -87,12 +108,13 @@ class Recovery(object):
 
         # GetInputWithDefault()
         UserOptions['RecoveryDisk'] = input("{}Disk to recover (defualt marked in []):{} [ {} ] ".format(com.color.HEADER, com.color.END,self._GetConfig('RecoveryDisk')))
-    
+        UserOptions['cpass'] = input("{}Number of Copy Passes:{} [ {} ] ".format(com.color.HEADER, com.color.END,self._GetConfig('cpass')))
+
         print("\nThe following numbers may be in decimal, hexadecimal or octal, and may be followed by\na multiplier: s = sectors, k = 1000, Ki = 1024, M = 10^6,  Mi  =  2^20, etc")
     
         UserOptions['skip-size'] = input("{}Skip Size (min,max):{} [ {} ] ".format(com.color.HEADER, com.color.END,self._GetConfig('skip-size')))
         UserOptions['cluster-size'] = input("{}Cluster Size:{} [ {} ] ".format(com.color.HEADER, com.color.END,self._GetConfig('cluster-size')))
-
+        ## End new method
 
         UserOptions['TargetDisk'] = TextMenu.GetInputNonEmpty("Target Disk")
 

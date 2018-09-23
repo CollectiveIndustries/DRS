@@ -63,7 +63,7 @@ def SetUpRescue():
         for case in com.switch(input('Recovery Type []: ').lower()):
             print("\n\n") # padd down a few lines then print selected options.
             if case('1'):
-                print("Full Recovery selected.")
+                print("Full: {}".format(Task.Type("full")))
                 break
             if case('2'): # No Scrape
                 print("No Scrape Recovery selected.")
