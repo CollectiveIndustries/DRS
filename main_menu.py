@@ -21,13 +21,13 @@ MyOS = com._OS_()
 
 ## Menu dictionaries
 MainMenu_Items = {"1":["GsmartControl","Harddrive Diagnostics"],
-            "2":["GNU ddrescue","Hard drive recovery + sector cloning"],
-            "3":["Rsync","Backup file systems to drive or server"],
-            "4":["Chntpw","Offline Windows password reset"],
-            "-1":["\n--------------------------------------------------------\n"],
-            "Q":["Quit","Closes terminal window"],
-            "S":["Shutdown","Power down System"],
-            "R":["Reboot","Reboot system (warm boot)"]}
+                  "2":["GNU ddrescue","Hard drive recovery + sector cloning"],
+                  "3":["Rsync","Backup file systems to drive or server"],
+                  "4":["Chntpw","Offline Windows password reset"],
+                  "-1":["\n--------------------------------------------------------\n"],
+                  "Q":["Quit","Closes terminal window"],
+                  "S":["Shutdown","Power down System"],
+                  "R":["Reboot","Reboot system (warm boot)"]}
 
 RecoveryTypeMenu_Items = {'1':["Full", "Copy passes x3, trim, and scrape"],
                           '2':["No Scrape","Copy passes x3 with trim only"],

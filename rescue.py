@@ -34,19 +34,19 @@ class Recovery(object):
                       'noscrape':['reopen-on-error', 'idirect', 'odirect', 'force', 'verbose', 'no-scrape'],
                       'notrim':['reopen-on-error', 'idirect', 'odirect', 'force', 'verbose', 'no-scrape', 'no-trim'],
                       'clone':['idirect', 'odirect', 'force', 'verbose', 'no-trim', 'no-scrape']
-                      }
+                     }
 
     _config_ = {'cluster-size':'1024',
-              'skip-size':'128s,1M',
-              'cpass':'3',
-              'CustomerFirstName':None,
-              'CustomerLastName':None,
-              'TechInitials':None,
-              'RecoveryDisk':'/dev/sda',
-              'TargetDisk':None,
-              'LogPath':'/media/data/DDRescue_Logs',
-              'LogFile':''
-              }
+                'skip-size':'128s,1M',
+                'cpass':'3',
+                'CustomerFirstName':None,
+                'CustomerLastName':None,
+                'TechInitials':None,
+                'RecoveryDisk':'/dev/sda',
+                'TargetDisk':None,
+                'LogPath':'/media/data/DDRescue_Logs',
+                'LogFile':''
+               }
 
     def Type(self,type='full'):
         """Returns recovery options based on type.
@@ -83,11 +83,30 @@ class Recovery(object):
 
     def _DisplayConfigChanges(self,_newConf_={}):
         """Prints out a side by side view of the configuration settings"""
-        _frmtstr_ = "{}: {} --> {}"
+        _Table_ = {"header":["Option","User Input"]}
+
+        widths = []
+        columns = []
+        tavnit = '|'
+        separator = '+'
+
         for k,v in self._config_.items():
-            for _k_, _v_ in _newConf_.items():
-                if k == _k_:
-                    print(_frmtstr_.format( k,v,_v_) )
+            _Table_[k] += v
+
+            # The magic lies in the third column of each cursor.description line
+            # (called cd[2] in the code). This column represents the length in
+            # characters of the longest value.
+            #  Thus we size the displayed column as the greater between that
+            #  and the length of the column header itself (max(cd[2], len(cd[0]))).
+        for cd in _Table_:
+            widths.append(max(cd[2], len(cd[0])))
+            columns.append(cd[0])
+
+        for w in widths:
+            tavnit += " %-"+"%ss |" % (w,)
+            separator += '-'*w + '--+'
+
+        
 
     def GetLogName(self):
         """Returns formated log name"""
