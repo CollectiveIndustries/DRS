@@ -33,44 +33,6 @@ RecoveryTypeMenu_Items = {'1':["Full", "Copy passes x3, trim, and scrape"],
                           'R':["Restart", "Restarts the Recovery Setup Wizard"],
                           'B':["Back", "Back to main menu"]}
 
-# Print Menu method with list of options as input
-class Menu(object):
-    _menuformatstring_ = "[{}] {} - {}"
-    _items_ = {}
-
-    def __init__(self,_items_=None):
-        if _items_ is None:
-            self._items_ = {}
-        else:
-            self._items_ = _items_
-
-    def Confirm(prompt, option):
-        """Confirm dialog"""
-        confirm = "{}{}{} \"{}\" Are you sure (y/n)?"
-        answer = input(confirm.format(com.color.WARNING, prompt, com.color.END, option)).lower()
-        if answer == "y":
-            return True
-        else:
-            return False
-
-    def GetInputNonEmpty(name):
-        """Refuse empty answers"""
-        option = None
-        while True:
-            option = input("{}{}:{} [ ] ".format(com.color.HEADER,name, com.color.END))
-            if option != "":
-                return option
-            option = None
-            print("{}{} cannot be empty!{}".format(com.color.FAIL,name,com.color.END))
-    
-    def Print(self):
-        """Print Multichoice menu"""
-        for option, text in self._items_.items():
-            if option != "-1":
-                print(self._menuformatstring_.format(option,text[0],text[1]))
-            else:
-                print(text[0])
-
 colorPrint("Diagnostic and Recovery Programs",com.color.HEADER)
 MainMenu = Menu(MainMenu_Items)
 
