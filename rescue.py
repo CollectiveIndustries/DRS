@@ -9,6 +9,7 @@ from subprocess import STDOUT,  PIPE, Popen, check_output, CalledProcessError
 import time
 from datetime import date
 from lib import com
+from menu import TextMenu
 
 # Mount options for the CIFS server share
 RescueMount = ['mount', '-o', 'username=root,password=cw8400,nocase', '//nas/data','/media/data']
@@ -81,6 +82,7 @@ class Recovery(object):
 
         UserOptions = self._config_
 
+        # GetInputWithDefault()
         UserOptions['RecoveryDisk'] = input("{}Disk to recover (defualt marked in []):{} [ {} ] ".format(com.color.HEADER, com.color.END,self._GetConfig('RecoveryDisk')))
     
         print("\nThe following numbers may be in decimal, hexadecimal or octal, and may be followed by\na multiplier: s = sectors, k = 1000, Ki = 1024, M = 10^6,  Mi  =  2^20, etc")
@@ -89,15 +91,15 @@ class Recovery(object):
         UserOptions['cluster-size'] = input("{}Cluster Size:{} [ {} ] ".format(com.color.HEADER, com.color.END,self._GetConfig('cluster-size')))
 
 
-        UserOptions['TargetDisk'] = self.GetInputNonEmpty("Target Disk")
+        UserOptions['TargetDisk'] = TextMenu.GetInputNonEmpty("Target Disk")
 
         while not self.Confirm("Target Disk", UserOptions['TargetDisk']):
-            UserOptions['TargetDisk'] = self.GetInputNonEmpty("Target Disk")
+            UserOptions['TargetDisk'] = TextMenu.GetInputNonEmpty("Target Disk")
         
         # Cannot be left blank these control the log file format
-        UserOptions['TechInitials'] = self.GetInputNonEmpty("Tech Initials")
-        UserOptions['CustomerLastName'] = self.GetInputNonEmpty("Customer Last Name")
-        UserOptions['CustomerFirstName'] = self.GetInputNonEmpty("Customer First Name")
+        UserOptions['TechInitials'] = TextMenu.GetInputNonEmpty("Tech Initials")
+        UserOptions['CustomerLastName'] = TextMenu.GetInputNonEmpty("Customer Last Name")
+        UserOptions['CustomerFirstName'] = TextMenu.GetInputNonEmpty("Customer First Name")
 
         self._DisplayConfigChanges(UserOptions)
 

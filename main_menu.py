@@ -6,6 +6,7 @@ import time
 import os, sys
 from lib import com
 import rescue as r
+import menu
 
 ## Functions
 def colorPrint(txt,colorStart):
@@ -34,14 +35,14 @@ RecoveryTypeMenu_Items = {'1':["Full", "Copy passes x3, trim, and scrape"],
                           'B':["Back", "Back to main menu"]}
 
 colorPrint("Diagnostic and Recovery Programs",com.color.HEADER)
-MainMenu = Menu(MainMenu_Items)
 
+MainMenu = menu.TextMenu(MainMenu_Items)
+RecoveryTypeMenu = menu.TextMenu(RecoveryTypeMenu_Items)
 
 while True:
     MyOS.Clear()
     print("OS Detected: {}".format(MyOS.FormatName()))
     MainMenu.Print()
-
     case = MenuInput()
 
 

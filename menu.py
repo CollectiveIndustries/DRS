@@ -23,15 +23,15 @@ class TextMenu(object):
         else:
             return False
 
-    def GetInputNonEmpty(name):
+    def GetInputNonEmpty(promt):
         """Refuse empty answers"""
         option = None
         while True:
-            option = input("{}{}:{} [ ] ".format(com.color.HEADER,name, com.color.END))
+            option = input("{}{}:{} [ ] ".format(com.color.HEADER,promt, com.color.END))
             if option != "":
                 return option
             option = None
-            print("{}{} cannot be empty!{}".format(com.color.FAIL,name,com.color.END))
+            print("{}{} cannot be empty!{}".format(com.color.FAIL,promt,com.color.END))
     
     def Print(self):
         """Print Multichoice menu"""
