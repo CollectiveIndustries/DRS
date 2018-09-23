@@ -25,12 +25,15 @@ MkDir = ['mkdir','-p']
 
 
 class Recovery(object):
-    """Defines a Recovery Environment Object"""
+    """Defines a Recovery Task Object"""
     _today_ = date.today().strftime("%m-%d-%y")
     _logfmtstr_ = "RecoveryLog_{}-{}_{}_{}.frds" # RecoveryLog_LastName-FirstName_M-D-Y_TI.frds
     _FSIgnore_ = ['iso9660', 'squashfs']
 
-    _recoveryType_ = {'full':['reopen-on-error', '--idirect', '--odirect', '--force', '--verbose']
+    _recoveryType_ = {'full':['reopen-on-error', 'idirect', 'odirect', 'force', 'verbose'],
+                      'noscrape':['reopen-on-error', 'idirect', 'odirect', 'force', 'verbose', 'no-scrape'],
+                      'notrim':['reopen-on-error', 'idirect', 'odirect', 'force', 'verbose', 'no-scrape', 'no-trim'],
+                      'clone':['cpass=1', 'idirect', 'odirect', 'force', 'verbose', 'no-trim', 'no-scrape']
                       }
 
     _config_ = {'cluster-size':'1024',
@@ -93,7 +96,7 @@ class Recovery(object):
 
         UserOptions['TargetDisk'] = TextMenu.GetInputNonEmpty("Target Disk")
 
-        while not self.Confirm("Target Disk", UserOptions['TargetDisk']):
+        while not TextMenu.Confirm("Target Disk", UserOptions['TargetDisk']):
             UserOptions['TargetDisk'] = TextMenu.GetInputNonEmpty("Target Disk")
         
         # Cannot be left blank these control the log file format
