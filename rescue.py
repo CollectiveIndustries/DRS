@@ -106,15 +106,15 @@ class Recovery(object):
 
         UserOptions = self._config_
 
-        # GetInputWithDefault()
-        UserOptions['RecoveryDisk'] = input("{}Disk to recover (defualt marked in []):{} [ {} ] ".format(com.color.HEADER, com.color.END,self._GetConfig('RecoveryDisk')))
-        UserOptions['cpass'] = input("{}Number of Copy Passes:{} [ {} ] ".format(com.color.HEADER, com.color.END,self._GetConfig('cpass')))
+        print("\nDefualts are marked in [ ]\n")
+        UserOptions['RecoveryDisk'] = TextMenu.GetDefaults("Recovery Disk", self._GetConfig('RecoveryDisk'))
+        UserOptions['cpass'] = TextMenu.GetDefaults("Number of Copy Passes",self._GetConfig('cpass'))
 
         print("\nThe following numbers may be in decimal, hexadecimal or octal, and may be followed by\na multiplier: s = sectors, k = 1000, Ki = 1024, M = 10^6,  Mi  =  2^20, etc")
     
-        UserOptions['skip-size'] = input("{}Skip Size (min,max):{} [ {} ] ".format(com.color.HEADER, com.color.END,self._GetConfig('skip-size')))
-        UserOptions['cluster-size'] = input("{}Cluster Size:{} [ {} ] ".format(com.color.HEADER, com.color.END,self._GetConfig('cluster-size')))
-        ## End new method
+        UserOptions['skip-size'] = TextMenu.GetDefaults("Skip Size (min,max)",self._GetConfig('skip-size'))
+        UserOptions['cluster-size'] = TextMenu.GetDefaults("Cluster Size",self._GetConfig('cluster-size'))
+
 
         UserOptions['TargetDisk'] = TextMenu.GetInputNonEmpty("Target Disk")
 

@@ -18,6 +18,7 @@ def colorPrint(txt,colorStart):
 _sleep_ = 5
 MyOS = com._OS_()
 
+
 ## Menu dictionaries
 MainMenu_Items = {"1":["GsmartControl","Harddrive Diagnostics"],
             "2":["GNU ddrescue","Hard drive recovery + sector cloning"],
@@ -35,7 +36,11 @@ RecoveryTypeMenu_Items = {'1':["Full", "Copy passes x3, trim, and scrape"],
                           "-1":["\n--------------------------------------------------------\n"],
                           'R':["Restart", "Restarts the Recovery Setup Wizard"],
                           'B':["Back", "Back to main menu"]}
+### Build the menues ###
+MainMenu = TextMenu(MainMenu_Items)
+RecoveryTypeMenu = TextMenu(RecoveryTypeMenu_Items)
 
+## Functions ##
 def ForkRecovery():
     pid = os.fork()
     if pid:
@@ -52,9 +57,7 @@ def ForkRecovery():
         sys.exit(0)
 
 def SetUpRescue():
-# Clear screen
-        
-        os.system("clear")
+        MyOS.Clear()
         Task = Recovery()
         TaskOptions = Task.GetConfigFromUser()
         TaskOptions['LogFile'] = Task.GetLogName()
@@ -86,46 +89,45 @@ def SetUpRescue():
         print("Selected Options."+com.color.OKBLUE)
         print(com.color.END+com.color.WARNING+"Executing ddrescue."+com.color.END)
 
-        # fork the subprocess here
-        # ForkRecovery()
 
-colorPrint("Diagnostic and Recovery Programs",com.color.HEADER)
-
-MainMenu = TextMenu(MainMenu_Items)
-RecoveryTypeMenu = TextMenu(RecoveryTypeMenu_Items)
-
-while True:
-    MyOS.Clear()
-    print("OS Detected: {}".format(MyOS.FormatName()))
+def main():
+    while True:
+        MyOS.Clear()
+        colorPrint("Diagnostic and Recovery Programs",com.color.HEADER)
+        print("OS Detected: {}".format(MyOS.FormatName()))
     
-    MainMenu.Print()
-    for case in com.switch(input("Select: ").lower()):
-        if case("1"):
-            print("Running gsmart hdd diagnostics.")
-            time.sleep(_sleep_)
-            break
-        if case("2"):
-            print("Calling ddrescue.")
-            time.sleep(_sleep_)
-            SetUpRescue()
-            break
-        if case("3"):
-            print("Running rsync backup.")
-            time.sleep(_sleep_)
-            break
-        if case("4"):
-            print("Starting Offline Regedit.")
-            time.sleep(_sleep_)
-            break
-        if case("q"):
-            sys.exit()
-        if case("s"):
-            print("Shutting down system")
-            time.sleep(_sleep_)
-            MyOS.Shutdown()
-            break
-        if case("r"):
-            print("Rebooting system")
-            time.sleep(_sleep_)
-            MyOS.Reboot()
-            break
+        MainMenu.Print()
+        for case in com.switch(input("Select: ").lower()):
+            if case("1"):
+                print("Running gsmart hdd diagnostics.")
+                time.sleep(_sleep_)
+                break
+            if case("2"):
+                print("Calling ddrescue.")
+                time.sleep(_sleep_)
+                SetUpRescue()
+                break
+            if case("3"):
+                print("Running rsync backup.")
+                time.sleep(_sleep_)
+                break
+            if case("4"):
+                print("Starting Offline Regedit.")
+                time.sleep(_sleep_)
+                break
+            if case("q"):
+                sys.exit()
+            if case("s"):
+                print("Shutting down system")
+                time.sleep(_sleep_)
+                MyOS.Shutdown()
+                break
+            if case("r"):
+                print("Rebooting system")
+                time.sleep(_sleep_)
+                MyOS.Reboot()
+                break
+
+# start program here
+if __name__ == "__main__":
+    main()
