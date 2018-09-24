@@ -38,7 +38,7 @@ RecoveryTypeMenu_Items = {'1':["Full", "Copy passes x3, trim, and scrape"],
                           'B':["Back", "Back to main menu"]}
 ### Build the menues ###
 MainMenu = TextMenu(MainMenu_Items,MainMenu_Headers)
-RecoveryTypeMenu = TextMenu(RecoveryTypeMenu_Items)
+RecoveryTypeMenu = TextMenu(RecoveryTypeMenu_Items,RecoveryTypeMenu_Headers)
 
 MainMenu.Align(MainMenu_Headers[1],"l")
 MainMenu.Align(MainMenu_Headers[2],"l")

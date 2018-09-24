@@ -113,6 +113,7 @@ class Recovery(object):
         """internal function for asking user config questions"""
         UserOptions = self._config_
         MyOS.Clear()
+        self.GetDevices()
         print("\nDefualts are marked in [ ]\n")
 
         UserOptions['RecoveryDisk'] = TextMenu.GetDefaults("Recovery Disk", self._GetConfig('RecoveryDisk'))
@@ -152,7 +153,7 @@ class Recovery(object):
         except:
             print("Error trying to call rescue")
 
-    def GetDevices(): # needs refactoring
+    def GetDevices(self): # needs refactoring
         """Get devices from lsblk"""
         print(com.color.BOLD+"\nAttached Storage Devices.\n"+com.color.END)
         lsblk = Popen(block_list, stdout=PIPE, stderr=PIPE)
