@@ -12,6 +12,8 @@ from lib import com
 from menu import TextMenu
 from prettytable import PrettyTable
 
+MyOS = com._OS_()
+
 # Mount options for the CIFS server share
 RescueMount = ['mount', '-o', 'username=root,password=cw8400,nocase', '//nas/data','/media/data']
 
@@ -28,7 +30,7 @@ MkDir = ['mkdir','-p']
 class Recovery(object):
     """Defines a Recovery Task Object"""
     _today_ = date.today().strftime("%m-%d-%y")
-    _logfmtstr_ = "RecoveryLog_{}-{}_{}_{}.frds" # RecoveryLog_LastName-FirstName_M-D-Y_TI.frds
+    _logfmtstr_ = "{}-{}_{}_{}.frds" # LastName-FirstName_M-D-Y_TI.frds
     _FSIgnore_ = ['iso9660', 'squashfs']
     
     _SettingsTable_ = PrettyTable()
@@ -87,6 +89,8 @@ class Recovery(object):
     def _DisplayConfigChanges(self,_newConf_={}):
         """Prints out a side by side view of the configuration settings"""
         self._SettingsTable_.field_names = ["Option","Value"]
+        self._SettingsTable_.align["Option"] = "l"
+        self._SettingsTable_.align["Value"] = "l"
         for name, value in _newConf_.items():
             self._SettingsTable_.add_row([name,value])
         print(self._SettingsTable_)
@@ -108,6 +112,7 @@ class Recovery(object):
     def _userqa_(self):
         """internal function for asking user config questions"""
         UserOptions = self._config_
+        MyOS.Clear()
         print("\nDefualts are marked in [ ]\n")
 
         UserOptions['RecoveryDisk'] = TextMenu.GetDefaults("Recovery Disk", self._GetConfig('RecoveryDisk'))
@@ -119,11 +124,11 @@ class Recovery(object):
         
         while not TextMenu.Confirm("Target Disk", UserOptions['TargetDisk']):
             UserOptions['TargetDisk'] = TextMenu.GetInputNonEmpty("Target Disk")
-        
+
         # Cannot be left blank these control the log file format
-        UserOptions['TechInitials'] = TextMenu.GetInputNonEmpty("Tech Initials")
-        UserOptions['CustomerLastName'] = TextMenu.GetInputNonEmpty("Customer Last Name")
-        UserOptions['CustomerFirstName'] = TextMenu.GetInputNonEmpty("Customer First Name")
+        UserOptions['TechInitials'] = TextMenu.GetInputNonEmpty("Tech Initials").upper()
+        UserOptions['CustomerLastName'] = TextMenu.GetInputNonEmpty("Customer Last Name").capitalize()
+        UserOptions['CustomerFirstName'] = TextMenu.GetInputNonEmpty("Customer First Name").capitalize()
         UserOptions['LogFile'] = self.GetLogName()
         
         self._DisplayConfigChanges(UserOptions)
