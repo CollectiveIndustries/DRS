@@ -1,18 +1,25 @@
 from lib import com
-
+from prettytable import PrettyTable
 
 
 class TextMenu(object):
     """Defines a Text Menu Object"""
-
-    _menuformatstring_ = "[{}] {} - {}"
     _items_ = {}
-
-    def __init__(self,_items_=None):
+    def __init__(self,_items_=None, ColHeaders=[]):
+        self._menu_ = PrettyTable()
+        self.Headers = ColHeaders
         if _items_ is None:
             self._items_ = {}
+            _menu_.field_names = []
         else:
-            self._items_ = _items_
+            self._menu_.field_names = ColHeaders
+            for option, text in _items_.items():
+                self._menu_.add_row([option]+ text)
+
+    def Align(self, header="", alignment="l"):
+        """Aligns a menu col
+        possible values are l, c, r"""
+        self._menu_.align[header] = alignment
 
     def Confirm(prompt, option):
         """Confirm dialog"""
@@ -34,7 +41,7 @@ class TextMenu(object):
             print("{}{} cannot be empty!{}".format(com.color.FAIL,promt,com.color.END))
     
     def GetDefaults(prompt, defval):
-        """Gets gets data from user providing a defualt option"""
+        """Gets data from user providing a defualt option"""
         formatstr = "{}{}:{} [ {} ] " # Header color prompt with defualt in [ ]
         response = input(formatstr.format(com.color.HEADER,prompt, com.color.END, defval))
         if response == "":
@@ -44,8 +51,4 @@ class TextMenu(object):
 
     def Print(self):
         """Print Multichoice menu"""
-        for option, text in self._items_.items():
-            if option != "-1":
-                print(self._menuformatstring_.format(option,text[0],text[1]))
-            else:
-                print(text[0])
+        print(self._menu_)
