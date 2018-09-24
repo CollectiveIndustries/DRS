@@ -20,26 +20,30 @@ MyOS = com._OS_()
 
 
 ## Menu dictionaries
+MainMenu_Headers = ["","Run","Description"]
 MainMenu_Items = {"1":["GsmartControl","Harddrive Diagnostics"],
                   "2":["GNU ddrescue","Hard drive recovery + sector cloning"],
                   "3":["Rsync","Backup file systems to drive or server"],
                   "4":["Chntpw","Offline Windows password reset"],
-                  "-1":["\n--------------------------------------------------------\n"],
                   "Q":["Quit","Closes terminal window"],
                   "S":["Shutdown","Power down System"],
                   "R":["Reboot","Reboot system (warm boot)"]}
 
+RecoveryTypeMenu_Headers = ["","Type","Description"]
 RecoveryTypeMenu_Items = {'1':["Full", "Copy passes x3, trim, and scrape"],
                           '2':["No Scrape","Copy passes x3 with trim only"],
                           '3':["No Trim","Copy passes x3, no trim, no scrape"],
                           '4':["Clone","Copy passes x1 with a larger read size"],
-                          "-1":["\n--------------------------------------------------------\n"],
                           'R':["Restart", "Restarts the Recovery Setup Wizard"],
                           'B':["Back", "Back to main menu"]}
 ### Build the menues ###
-MainMenu = TextMenu(MainMenu_Items)
+MainMenu = TextMenu(MainMenu_Items,MainMenu_Headers)
 RecoveryTypeMenu = TextMenu(RecoveryTypeMenu_Items)
 
+MainMenu.Align(MainMenu_Headers[1],"l")
+MainMenu.Align(MainMenu_Headers[2],"l")
+RecoveryTypeMenu.Align(RecoveryTypeMenu_Headers[1],"l")
+RecoveryTypeMenu.Align(RecoveryTypeMenu_Headers[2],"l")
 ## Functions ##
 def ForkRecovery():
     pid = os.fork()

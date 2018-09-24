@@ -10,6 +10,7 @@ import time
 from datetime import date
 from lib import com
 from menu import TextMenu
+from prettytable import PrettyTable
 
 # Mount options for the CIFS server share
 RescueMount = ['mount', '-o', 'username=root,password=cw8400,nocase', '//nas/data','/media/data']
@@ -29,6 +30,8 @@ class Recovery(object):
     _today_ = date.today().strftime("%m-%d-%y")
     _logfmtstr_ = "RecoveryLog_{}-{}_{}_{}.frds" # RecoveryLog_LastName-FirstName_M-D-Y_TI.frds
     _FSIgnore_ = ['iso9660', 'squashfs']
+    
+    _SettingsTable_ = PrettyTable()
 
     _recoveryType_ = {'full':['reopen-on-error', 'idirect', 'odirect', 'force', 'verbose'],
                       'noscrape':['reopen-on-error', 'idirect', 'odirect', 'force', 'verbose', 'no-scrape'],
@@ -83,28 +86,10 @@ class Recovery(object):
 
     def _DisplayConfigChanges(self,_newConf_={}):
         """Prints out a side by side view of the configuration settings"""
-        _Table_ = {"header":["Option","User Input"]}
-
-        widths = []
-        columns = []
-        tavnit = '|'
-        separator = '+'
-
-        for k,v in self._config_.items():
-            _Table_[k] += v
-
-            # The magic lies in the third column of each cursor.description line
-            # (called cd[2] in the code). This column represents the length in
-            # characters of the longest value.
-            #  Thus we size the displayed column as the greater between that
-            #  and the length of the column header itself (max(cd[2], len(cd[0]))).
-        for cd in _Table_:
-            widths.append(max(cd[2], len(cd[0])))
-            columns.append(cd[0])
-
-        for w in widths:
-            tavnit += " %-"+"%ss |" % (w,)
-            separator += '-'*w + '--+'
+        self._SettingsTable_.field_names = ["Option","Value"]
+        for name, value in _newConf_.items():
+            self._SettingsTable_.add_row([name,value])
+        print(self._SettingsTable_)
 
         
 
@@ -120,23 +105,18 @@ class Recovery(object):
         """Saves the user settings"""
         self._config_ = _newConfig_
 
-    def GetConfigFromUser(self):
-        """Gets data from user to define recovery environment"""
-
+    def _userqa_(self):
+        """internal function for asking user config questions"""
         UserOptions = self._config_
-
         print("\nDefualts are marked in [ ]\n")
+
         UserOptions['RecoveryDisk'] = TextMenu.GetDefaults("Recovery Disk", self._GetConfig('RecoveryDisk'))
         UserOptions['cpass'] = TextMenu.GetDefaults("Number of Copy Passes",self._GetConfig('cpass'))
-
         print("\nThe following numbers may be in decimal, hexadecimal or octal, and may be followed by\na multiplier: s = sectors, k = 1000, Ki = 1024, M = 10^6,  Mi  =  2^20, etc")
-    
         UserOptions['skip-size'] = TextMenu.GetDefaults("Skip Size (min,max)",self._GetConfig('skip-size'))
         UserOptions['cluster-size'] = TextMenu.GetDefaults("Cluster Size",self._GetConfig('cluster-size'))
-
-
         UserOptions['TargetDisk'] = TextMenu.GetInputNonEmpty("Target Disk")
-
+        
         while not TextMenu.Confirm("Target Disk", UserOptions['TargetDisk']):
             UserOptions['TargetDisk'] = TextMenu.GetInputNonEmpty("Target Disk")
         
@@ -144,9 +124,16 @@ class Recovery(object):
         UserOptions['TechInitials'] = TextMenu.GetInputNonEmpty("Tech Initials")
         UserOptions['CustomerLastName'] = TextMenu.GetInputNonEmpty("Customer Last Name")
         UserOptions['CustomerFirstName'] = TextMenu.GetInputNonEmpty("Customer First Name")
-
+        UserOptions['LogFile'] = self.GetLogName()
+        
         self._DisplayConfigChanges(UserOptions)
+        return UserOptions
 
+    def GetConfigFromUser(self):
+        """Gets data from user to define recovery environment"""
+        UserOptions = self._userqa_()
+        while not TextMenu.Confirm("Configuration Changed"):
+             self._userqa_()
         return UserOptions
 
     def _GetConfig(self,name):

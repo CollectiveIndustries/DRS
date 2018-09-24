@@ -21,9 +21,9 @@ class TextMenu(object):
         possible values are l, c, r"""
         self._menu_.align[header] = alignment
 
-    def Confirm(prompt, option):
+    def Confirm(prompt="", option=""):
         """Confirm dialog"""
-        confirm = "{}{}{} \"{}\" Are you sure (y/n)?"
+        confirm = "{}{}{} {} Are you sure (y/n)?"
         answer = input(confirm.format(com.color.WARNING, prompt, com.color.END, option)).lower()
         if answer == "y":
             return True
