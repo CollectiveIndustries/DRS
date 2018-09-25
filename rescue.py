@@ -16,9 +16,9 @@ MyOS = com._OS_()
 
 global debug
 debug = False
+_lsblkDataFile_ = "lsblkDump.json"
 if MyOS._type_ == "win32":
     debug = True
-    _lsblkDataFile_ = "lsblkDump.json"
 
 # Mount options for the CIFS server share
 RescueMount = ['mount', '-o', 'username=root,password=cw8400,nocase', '//nas/data','/media/data']
@@ -160,6 +160,10 @@ class Recovery(object):
         except:
             print("Error trying to call rescue")
 
+    def _loadJsonDump_(self):
+        with open(_lsblkDataFile_) as json_data:
+            return json.load(json_data)
+
     def GetDevices(self): # needs refactoring
         """Get devices from lsblk
         If Win32 OS load lsblkDump.json"""
@@ -170,22 +174,21 @@ class Recovery(object):
         if not debug:
             lsblk = Popen(block_list, stdout=PIPE, stderr=PIPE)
             out, err = lsblk.communicate()
-            decoded = json.loads(out)
+            try:
+                decoded = json.loads(out)
+            except(ValueError, KeyError, TypeError): # LSBLK is also not in the Linux Subshell for Windows
+                print("[{}FAIL{}] lsblk returned the wrong JSON format".format(com.color.FAIL,com.color.END))
+                print("Using json dump instead!! {}WARNING{} Falling back in debug mode.".format(com.color.WARNING,com.color.END))
+                decoded = self._loadJsonDump_()
         else: # LSBLK is unsupported on windows use the JSON test data from the Kali Linux VM instead
-            with open(_lsblkDataFile_) as json_data:
-                decoded = json.load(json_data)
-
-        try:
+            decoded = self._loadJsonDump_()
             
-            for x in decoded['blockdevices']:
-                if x['fstype'] not in _FSignore_: # Make sure we list only valid drives and are NOT in the Ignore list
-                    print(com.color.HEADER+"Drive:  "+com.color.OKGREEN+"/dev/"+x['name']+com.color.END)
-                    print(com.color.HEADER+"Size:   "+com.color.WARNING+x['size']+com.color.END)
-                if x['model'] is not None:
-                    print(com.color.HEADER+"Model:  "+com.color.END+x['model'])
-                if x['serial'] is not None:
-                    print(com.color.HEADER+"Serial: "+com.color.END+x['serial'])
-                    print("") # add a blank line at the end of each group as some values may not print
-    
-        except (ValueError, KeyError, TypeError):
-            print("lsblk returned the wrong JSON format")
+        for x in decoded['blockdevices']:
+            if x['fstype'] not in _FSignore_: # Make sure we list only valid drives and are NOT in the Ignore list
+                print(com.color.HEADER+"Drive:  "+com.color.OKGREEN+"/dev/"+x['name']+com.color.END)
+                print(com.color.HEADER+"Size:   "+com.color.WARNING+x['size']+com.color.END)
+            if x['model'] is not None:
+                print(com.color.HEADER+"Model:  "+com.color.END+x['model'])
+            if x['serial'] is not None:
+                print(com.color.HEADER+"Serial: "+com.color.END+x['serial'])
+                print("") # add a blank line at the end of each group as some values may not print

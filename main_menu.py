@@ -73,13 +73,13 @@ def SetUpRescue():
                 print("Full: {}".format(Task.Type("full")))
                 break
             if case('2'): # No Scrape
-                print("No Scrape Recovery selected.")
+                print("No Scrap: {}".format(Task.Type("noscrape")))
                 break
             if case('3'): # No trim
-                print("Full 3 pass clone selected.")
+                print("No Trim: {}".format(Task.Type("notrim")))
                 break
             if case('4'): # Single forward copy (large block size) good drive clone
-                print("Single pass Clone selected.")
+                print("Clone: {}".format(Task.Type("clone")))
                 break
             if case('r'):# Restarts the Recovery Setup
                 break

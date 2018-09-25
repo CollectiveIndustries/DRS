@@ -23,7 +23,7 @@ class TextMenu(object):
 
     def Confirm(prompt="", option=""):
         """Confirm dialog"""
-        confirm = "{}{}{} {} Are you sure (y/n)?"
+        confirm = "{}{}{} {} Are you sure (y/n)? "
         answer = input(confirm.format(com.color.WARNING, prompt, com.color.END, option)).lower()
         if answer == "y":
             return True
