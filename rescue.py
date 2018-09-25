@@ -14,8 +14,9 @@ from prettytable import PrettyTable
 
 MyOS = com._OS_()
 
+global debug
+debug = False
 if MyOS._type_ == "win32":
-    global debug
     debug = True
     _lsblkDataFile_ = "lsblkDump.json"
 
