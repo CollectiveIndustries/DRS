@@ -14,6 +14,11 @@ from prettytable import PrettyTable
 
 MyOS = com._OS_()
 
+if MyOS._type_ == "win32":
+    global debug
+    debug = True
+    _lsblkDataFile_ = "lsblkDump.json"
+
 # Mount options for the CIFS server share
 RescueMount = ['mount', '-o', 'username=root,password=cw8400,nocase', '//nas/data','/media/data']
 
@@ -26,9 +31,9 @@ NtfsFix = ['ntfsfix', '--clear-bad-sectors', '--clean-dirty']
     # Make Directory Path just incase it doesnt exist
 MkDir = ['mkdir','-p']
 
-
 class Recovery(object):
     """Defines a Recovery Task Object"""
+    global debug
     _today_ = date.today().strftime("%m-%d-%y")
     _logfmtstr_ = "{}-{}_{}_{}.frds" # LastName-FirstName_M-D-Y_TI.frds
     _FSIgnore_ = ['iso9660', 'squashfs']
@@ -73,7 +78,7 @@ class Recovery(object):
         else:
             return [frmtStrLng.format("cluster-size",clusterSize), frmtStrLng.format("skip-size",skipSize),frmtStrLng.format("cpass",copyPass) ] + optLst
 
-    def doMount(): # Needs refactoring (move to class Recovery()
+    def doMount(): # Needs refactoring
         try:
             print("Mounting Storage Server....")
             err = check_output(RescueMount)
@@ -95,8 +100,6 @@ class Recovery(object):
             self._SettingsTable_.add_row([name,value])
         print(self._SettingsTable_)
 
-        
-
     def GetLogName(self):
         """Returns formated log name"""
         return self._logfmtstr_.format(self._GetConfig('CustomerLastName'),self._GetConfig('CustomerFirstName'),self._today_,self._GetConfig('TechInitials'))
@@ -114,6 +117,9 @@ class Recovery(object):
         UserOptions = self._config_
         MyOS.Clear()
         self.GetDevices()
+        if debug:
+            print("\n\n{}WARNING{} Win32 Debug Environment detected.\nAll ddrescue functionality disabled.\n".format(com.color.WARNING,com.color.END))
+
         print("\nDefualts are marked in [ ]\n")
 
         UserOptions['RecoveryDisk'] = TextMenu.GetDefaults("Recovery Disk", self._GetConfig('RecoveryDisk'))
@@ -154,14 +160,24 @@ class Recovery(object):
             print("Error trying to call rescue")
 
     def GetDevices(self): # needs refactoring
-        """Get devices from lsblk"""
+        """Get devices from lsblk
+        If Win32 OS load lsblkDump.json"""
         print(com.color.BOLD+"\nAttached Storage Devices.\n"+com.color.END)
-        lsblk = Popen(block_list, stdout=PIPE, stderr=PIPE)
-        out, err = lsblk.communicate()
-        try:
+        _FSignore_ = ['iso9660', 'squashfs']
+
+        # Load data from provider
+        if not debug:
+            lsblk = Popen(block_list, stdout=PIPE, stderr=PIPE)
+            out, err = lsblk.communicate()
             decoded = json.loads(out)
+        else: # LSBLK is unsupported on windows use the JSON test data from the Kali Linux VM instead
+            with open(_lsblkDataFile_) as json_data:
+                decoded = json.load(json_data)
+
+        try:
+            
             for x in decoded['blockdevices']:
-                if x['fstype'] not in self._FSignore_: # Make sure we list only valid drives and are NOT in the Ignore list
+                if x['fstype'] not in _FSignore_: # Make sure we list only valid drives and are NOT in the Ignore list
                     print(com.color.HEADER+"Drive:  "+com.color.OKGREEN+"/dev/"+x['name']+com.color.END)
                     print(com.color.HEADER+"Size:   "+com.color.WARNING+x['size']+com.color.END)
                 if x['model'] is not None:
