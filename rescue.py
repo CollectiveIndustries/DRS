@@ -55,7 +55,7 @@ class Recovery(object):
                 'TechInitials':None,
                 'RecoveryDisk':'/dev/sda',
                 'TargetDisk':None,
-                'LogPath':'/media/data/DDRescue_Logs',
+                'LogPath':'/log/',
                 'LogFile':''
                }
 
@@ -79,7 +79,7 @@ class Recovery(object):
         else:
             return [frmtStrLng.format("cluster-size",clusterSize), frmtStrLng.format("skip-size",skipSize),frmtStrLng.format("cpass",copyPass) ] + optLst
 
-    def doMount(): # Needs refactoring
+    def NasMount(): # Needs refactoring Might be moved to a NAS Storage handler
         try:
             print("Mounting Storage Server....")
             err = check_output(RescueMount)
