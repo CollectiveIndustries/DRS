@@ -139,6 +139,7 @@ class Recovery(object):
         UserOptions['CustomerFirstName'] = TextMenu.GetInputNonEmpty("Customer First Name").capitalize()
         UserOptions['LogFile'] = self.GetLogName()
         
+        MyOS.Clear()
         self._DisplayConfigChanges(UserOptions)
         return UserOptions
 
