@@ -51,4 +51,5 @@ class TextMenu(object):
 
     def Print(self):
         """Print Multichoice menu"""
+        self._menu_.sortby = self._menu_.field_names[0]
         print(self._menu_)

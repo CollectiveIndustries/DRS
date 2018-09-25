@@ -20,7 +20,7 @@ MyOS = com._OS_()
 
 
 ## Menu dictionaries
-MainMenu_Headers = ["","Run","Description"]
+MainMenu_Headers = ["#","Run","Description"]
 MainMenu_Items = {"1":["GsmartControl","Harddrive Diagnostics"],
                   "2":["GNU ddrescue","Hard drive recovery + sector cloning"],
                   "3":["Rsync","Backup file systems to drive or server"],
@@ -29,7 +29,7 @@ MainMenu_Items = {"1":["GsmartControl","Harddrive Diagnostics"],
                   "S":["Shutdown","Power down System"],
                   "R":["Reboot","Reboot system (warm boot)"]}
 
-RecoveryTypeMenu_Headers = ["","Type","Description"]
+RecoveryTypeMenu_Headers = ["#","Type","Description"]
 RecoveryTypeMenu_Items = {'1':["Full", "Copy passes x3, trim, and scrape"],
                           '2':["No Scrape","Copy passes x3 with trim only"],
                           '3':["No Trim","Copy passes x3, no trim, no scrape"],
@@ -70,16 +70,16 @@ def SetUpRescue():
         for case in com.switch(input('Recovery Type []: ').lower()):
             print("\n\n") # padd down a few lines then print selected options.
             if case('1'):
-                print("Full: {}".format(Task.Type("full")))
+                print("Full: {}".format(Task._RecoveryCMDbuilder_("full")))
                 break
             if case('2'): # No Scrape
-                print("No Scrap: {}".format(Task.Type("noscrape")))
+                print("No Scrap: {}".format(Task._RecoveryCMDbuilder_("noscrape")))
                 break
             if case('3'): # No trim
-                print("No Trim: {}".format(Task.Type("notrim")))
+                print("No Trim: {}".format(Task._RecoveryCMDbuilder_("notrim")))
                 break
             if case('4'): # Single forward copy (large block size) good drive clone
-                print("Clone: {}".format(Task.Type("clone")))
+                print("Clone: {}".format(Task._RecoveryCMDbuilder_("clone")))
                 break
             if case('r'):# Restarts the Recovery Setup
                 break

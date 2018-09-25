@@ -63,7 +63,7 @@ class Recovery(object):
                          'LogFile':''
                         }
 
-    def Type(self,type='full'):
+    def _RecoveryCMDbuilder_(self,type='full'):
         """Returns recovery options based on type.
         full, noscrape, notrim, clone
         """
@@ -93,7 +93,7 @@ class Recovery(object):
             print(com.color.FAIL+"ERROR while mounting "+RescueMount[3]+'\nReturned with Error:\n>>>> '+str(ERROR)+com.color.END)
             exit(ERROR.returncode)
 
-    def _DisplayConfigChanges(self,_newConf_={}):
+    def _DisplayConfigChanges_(self,_newConf_={}):
         """Prints out a side by side view of the configuration settings"""
         self._SettingsTable_.clear_rows() # clean out the table and rebuild a new one with current settings
         for name, value in _newConf_.items():
@@ -104,24 +104,17 @@ class Recovery(object):
         """Returns formated log name"""
         return self._logfmtstr_.format(self._GetConfig('CustomerLastName'),self._GetConfig('CustomerFirstName'),self._today_,self._GetConfig('TechInitials'))
 
-    def SetConfig(self,name,value):
-        """Saves value to name"""
-        self._config_[name] = value
-
-    def _saveConfig(self,_newConfig_):
-        """Saves the user settings"""
-        self._config_ = _newConfig_
-
     def _userqa_(self):
         """internal method for asking user config questions"""
         UserOptions = self._config_
         MyOS.Clear()
-        self.GetDevices()
         if debug:
             print("\n\n{}WARNING{} Win32 Debug Environment detected.\nAll ddrescue functionality disabled.\n".format(com.color.WARNING,com.color.END))
 
-        print("\nDefualts are marked in [ ]\n")
+        self._GetDevices_()
 
+        print("\nDefualts are marked in [ ]\n")
+        
         UserOptions['RecoveryDisk'] = TextMenu.GetDefaults("Recovery Disk", self._GetConfig('RecoveryDisk'))
         UserOptions['cpass'] = TextMenu.GetDefaults("Number of Copy Passes",self._GetConfig('cpass'))
         print("\nThe following numbers may be in decimal, hexadecimal or octal, and may be followed by\na multiplier: s = sectors, k = 1000, Ki = 1024, M = 10^6,  Mi  =  2^20, etc")
@@ -139,7 +132,7 @@ class Recovery(object):
         UserOptions['LogFile'] = self.GetLogName()
         
         MyOS.Clear()
-        self._DisplayConfigChanges(UserOptions)
+        self._DisplayConfigChanges_(UserOptions)
         return UserOptions
 
     def GetConfigFromUser(self):
@@ -161,13 +154,16 @@ class Recovery(object):
             print("Error trying to call rescue")
 
     def _loadJsonDump_(self):
+        """Pulls a JSON file returns the data.
+        Used primarily for debugging"""
         with open(_lsblkDataFile_) as json_data:
             return json.load(json_data)
 
-    def GetDevices(self): # needs refactoring
+    def _GetDevices_(self): # needs refactoring
         """Get devices from lsblk
         If Win32 OS load lsblkDump.json"""
         print(com.color.BOLD+"\nAttached Storage Devices.\n"+com.color.END)
+        UserOptions = self._config_
         _FSignore_ = ['iso9660', 'squashfs']
 
         # Load data from provider
@@ -192,3 +188,5 @@ class Recovery(object):
             if x['serial'] is not None:
                 print(com.color.HEADER+"Serial: "+com.color.END+x['serial'])
                 print("") # add a blank line at the end of each group as some values may not print
+
+            
