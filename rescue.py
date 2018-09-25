@@ -29,7 +29,7 @@ block_list = ['lsblk', '--json', '--noheadings', '--nodeps', '-o', 'name,size,mo
 # file system repair after the clone or rescue we need to reset bad blocks and journal files.
 NtfsFix = ['ntfsfix', '--clear-bad-sectors', '--clean-dirty']
 
-    # Make Directory Path just incase it doesnt exist
+# Make Directory Path just incase it doesnt exist
 MkDir = ['mkdir','-p']
 
 class Recovery(object):
@@ -113,7 +113,7 @@ class Recovery(object):
         self._config_ = _newConfig_
 
     def _userqa_(self):
-        """internal function for asking user config questions"""
+        """internal method for asking user config questions"""
         UserOptions = self._config_
         MyOS.Clear()
         self.GetDevices()
@@ -146,7 +146,6 @@ class Recovery(object):
         """Gets data from user to define recovery environment"""
         UserOptions = self._userqa_()
         while not TextMenu.Confirm("Configuration Changed"):
-             #self._config_ = {}
              self._userqa_()
         return UserOptions
 

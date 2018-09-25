@@ -23,6 +23,7 @@
     <Content Include="lsblkDump.json" />
     <Content Include="README.md" />
     <Content Include="reginfo.txt" />
+    <Content Include="requirements.txt" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="fddrescue.py" />
