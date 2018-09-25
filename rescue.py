@@ -34,30 +34,34 @@ MkDir = ['mkdir','-p']
 
 class Recovery(object):
     """Defines a Recovery Task Object"""
-    global debug
-    _today_ = date.today().strftime("%m-%d-%y")
-    _logfmtstr_ = "{}-{}_{}_{}.frds" # LastName-FirstName_M-D-Y_TI.frds
-    _FSIgnore_ = ['iso9660', 'squashfs']
+    def __init__(self, *args, **kwargs):
+        global debug
+        self._today_ = date.today().strftime("%m-%d-%y")
+        self._logfmtstr_ = "{}-{}_{}_{}.frds" # LastName-FirstName_M-D-Y_TI.frds
+        self._FSIgnore_ = ['iso9660', 'squashfs']
     
-    _SettingsTable_ = PrettyTable()
+        self._SettingsTable_ = PrettyTable()
+        self._SettingsTable_.field_names = ["Option","Value"]
+        self._SettingsTable_.align["Option"] = "l"
+        self._SettingsTable_.align["Value"] = "l"
+        
+        self._recoveryType_ = {'full':['reopen-on-error', 'idirect', 'odirect', 'force', 'verbose'],
+                               'noscrape':['reopen-on-error', 'idirect', 'odirect', 'force', 'verbose', 'no-scrape'],
+                               'notrim':['reopen-on-error', 'idirect', 'odirect', 'force', 'verbose', 'no-scrape', 'no-trim'],
+                               'clone':['idirect', 'odirect', 'force', 'verbose', 'no-trim', 'no-scrape']
+                              }
 
-    _recoveryType_ = {'full':['reopen-on-error', 'idirect', 'odirect', 'force', 'verbose'],
-                      'noscrape':['reopen-on-error', 'idirect', 'odirect', 'force', 'verbose', 'no-scrape'],
-                      'notrim':['reopen-on-error', 'idirect', 'odirect', 'force', 'verbose', 'no-scrape', 'no-trim'],
-                      'clone':['idirect', 'odirect', 'force', 'verbose', 'no-trim', 'no-scrape']
-                     }
-
-    _config_ = {'cluster-size':'1024',
-                'skip-size':'128s,1M',
-                'cpass':'3',
-                'CustomerFirstName':None,
-                'CustomerLastName':None,
-                'TechInitials':None,
-                'RecoveryDisk':'/dev/sda',
-                'TargetDisk':None,
-                'LogPath':'/log/',
-                'LogFile':''
-               }
+        self._config_ = {'cluster-size':'1024',
+                         'skip-size':'128s,1M',
+                         'cpass':'3',
+                         'CustomerFirstName':None,
+                         'CustomerLastName':None,
+                         'TechInitials':None,
+                         'RecoveryDisk':'/dev/sda',
+                         'TargetDisk':None,
+                         'LogPath':'/log/',
+                         'LogFile':''
+                        }
 
     def Type(self,type='full'):
         """Returns recovery options based on type.
@@ -89,14 +93,9 @@ class Recovery(object):
             print(com.color.FAIL+"ERROR while mounting "+RescueMount[3]+'\nReturned with Error:\n>>>> '+str(ERROR)+com.color.END)
             exit(ERROR.returncode)
 
-    def __init__(self, *args, **kwargs):
-        return super().__init__(*args, **kwargs)
-
     def _DisplayConfigChanges(self,_newConf_={}):
         """Prints out a side by side view of the configuration settings"""
-        self._SettingsTable_.field_names = ["Option","Value"]
-        self._SettingsTable_.align["Option"] = "l"
-        self._SettingsTable_.align["Value"] = "l"
+        self._SettingsTable_.clear_rows() # clean out the table and rebuild a new one with current settings
         for name, value in _newConf_.items():
             self._SettingsTable_.add_row([name,value])
         print(self._SettingsTable_)
@@ -147,6 +146,7 @@ class Recovery(object):
         """Gets data from user to define recovery environment"""
         UserOptions = self._userqa_()
         while not TextMenu.Confirm("Configuration Changed"):
+             #self._config_ = {}
              self._userqa_()
         return UserOptions
 
