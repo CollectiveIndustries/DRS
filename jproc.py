@@ -1,10 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# TODO 9 clean up import list
-import subprocess
-import time
-import os
-import json
+import subprocess, time, os, json
 from lib import com
 
 def print_warning(args):

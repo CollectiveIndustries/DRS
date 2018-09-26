@@ -3,9 +3,7 @@
 # Python script to find and mount a filesystem and then rescue data at the file system level.
 # If this fails to mount the disk we may need to image the drive.
 
-# TODO 9 clean up import list
-import os, sys
-import time
+import os, sys, time
 from lib import com, disk
 
 # Variable resets.

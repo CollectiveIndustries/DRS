@@ -2,12 +2,9 @@
 
 # Python script to set variables and call ddrescue.
 
-# TODO 9 clean up import list
-import os, sys
-import shlex
+import os, sys, shlex, time
 from jproc import JSONProcess
 from subprocess import STDOUT,  PIPE, Popen, check_output, CalledProcessError
-import time
 from datetime import date
 from lib import com
 from menu import TextMenu
@@ -197,5 +194,3 @@ class Recovery(object):
             if x['serial'] is not None:
                 print(com.color.HEADER+"Serial: "+com.color.END+x['serial'])
                 print("") # add a blank line at the end of each group as some values may not print
-
-            
