@@ -29,6 +29,9 @@
     <Compile Include="fddrescue.py" />
     <Compile Include="Fddrescue\ExcludeConvert.py" />
     <Compile Include="Fddrescue\fddrescue.py" />
+    <Compile Include="jproc.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="menu.py">
       <SubType>Code</SubType>
     </Compile>

@@ -168,12 +168,19 @@ class Recovery(object):
 
         # Load data from provider
         if not debug:
-            lsblk = Popen(block_list, stdout=PIPE, stderr=PIPE)
-            out, err = lsblk.communicate()
             try:
+                lsblk = Popen(block_list, stdout=PIPE, stderr=PIPE)
+                out, err = lsblk.communicate()
+            except OSError as _e_:
+                print("{}Returned with Error:\n>>>>{}\n>>>>{}\n{}".format(com.color.FAIL,_e_.errno,_e_.strerror,com.color.END))
+
+            try:
+                json.loads(myResponse.content.decode(chardet.detect(myResponse.content)["encoding"]))
                 decoded = json.loads(out)
-            except(ValueError, KeyError, TypeError): # LSBLK is also not in the Linux Subshell for Windows
+            except (ValueError, KeyError, TypeError) as e: # LSBLK is also not in the Linux Subshell for Windows
                 print("[{}FAIL{}] lsblk returned the wrong JSON format".format(com.color.FAIL,com.color.END))
+                print("{}Returned with:\n>>>{}{}".format(com.color.FAIL,out,com.color.END))
+                print(str(e)) # the JSON object must be str, not 'bytes'
                 print("Using json dump instead!! {}WARNING{} Falling back in debug mode.".format(com.color.WARNING,com.color.END))
                 decoded = self._loadJsonDump_()
         else: # LSBLK is unsupported on windows use the JSON test data from the Kali Linux VM instead
