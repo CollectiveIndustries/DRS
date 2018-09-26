@@ -2,7 +2,7 @@
 
 from subprocess import STDOUT,  PIPE, Popen, check_output, CalledProcessError
 
-# TODO rename test.py to pathbuilder.py
+# TODO 3 rename test.py to pathbuilder.py
 # make sure these work
 
 # module functions as follows:
@@ -17,7 +17,7 @@ def GetTree(path='/mnt'):
     out, err = find.communicate()
     return([s.strip() for s in out.splitlines()])
 
-# TODO more pythonic way of doing this?
+# TODO 4 more pythonic way of doing this?
 def SetTree(newpath):
     """Rebuilds file tree at path"""
     disk.prog.mkdir[2] = newpath

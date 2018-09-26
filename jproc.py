@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# TODO clean up import list
+# TODO 9 clean up import list
 import subprocess
 import time
 import os
@@ -10,7 +10,7 @@ from lib import com
 def print_warning(args):
     print("{}{}{}".format(com.color.WARNING,args,com.color.END))
 
-# TODO Refactor JSONProcess class
+# TODO 2 Refactor JSONProcess class
 class JSONProcess:
     """ If anything wrong happens, only preserve 4KB output from the output"""
     PROCESS_BUF_SIZE = 1024*256

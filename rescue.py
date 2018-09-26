@@ -2,7 +2,7 @@
 
 # Python script to set variables and call ddrescue.
 
-# TODO clean up import list
+# TODO 9 clean up import list
 import os, sys
 import shlex
 from jproc import JSONProcess
@@ -154,13 +154,14 @@ class Recovery(object):
         except:
             print("Error trying to call rescue")
 
+    # TODO 1 EXCEPTION on json import, refactor and move to jproc module
     def _loadJsonDump_(self):
         """Pulls a JSON file returns the data.
         Used primarily for debugging"""
         with open(_lsblkDataFile_) as json_data:
             return json.load(json_data)
 
-    def _GetDevices_(self): # TODO needs refactoring, this is part of Issue #1
+    def _GetDevices_(self): # TODO 0 needs refactoring, this is part of Issue #1
         """Get devices from lsblk
         If Win32 OS load lsblkDump.json"""
         print(com.color.BOLD+"\nAttached Storage Devices.\n"+com.color.END)
