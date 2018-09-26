@@ -4,7 +4,7 @@
 
 import os, sys
 import shlex
-import json
+from jproc import JSONProcess
 from subprocess import STDOUT,  PIPE, Popen, check_output, CalledProcessError
 import time
 from datetime import date

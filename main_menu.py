@@ -5,8 +5,6 @@
 import time
 import os, sys
 from lib import com
-import rescue as r
-
 from menu import TextMenu
 from rescue import Recovery
 
@@ -60,7 +58,8 @@ def ForkRecovery():
         Popen(['ddrescueview', RescueLogPath+"/"+LogFile], stdout=PIPE, stderr=PIPE)
         sys.exit(0)
 
-def SetUpRescue():
+def StartRescueTask():
+    """Starts a rescue task"""
         MyOS.Clear()
         Task = Recovery()
         TaskOptions = Task.GetConfigFromUser()
@@ -95,6 +94,7 @@ def SetUpRescue():
 
 
 def main():
+    """Main program entry point"""
     while True:
         MyOS.Clear()
         colorPrint("Diagnostic and Recovery Programs",com.color.HEADER)
@@ -109,7 +109,7 @@ def main():
             if case("2"):
                 print("Calling ddrescue.")
                 time.sleep(_sleep_)
-                SetUpRescue()
+                StartRescueTask()
                 break
             if case("3"):
                 print("Running rsync backup.")

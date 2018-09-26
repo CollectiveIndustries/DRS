@@ -24,8 +24,7 @@ class TextMenu(object):
     def Confirm(prompt="", option=""):
         """Confirm dialog"""
         confirm = "{}{}{} {} Are you sure (y/n)? "
-        answer = input(confirm.format(com.color.WARNING, prompt, com.color.END, option)).lower()
-        if answer == "y":
+        if input(confirm.format(com.color.WARNING, prompt, com.color.END, option)).lower() == "y":
             return True
         else:
             return False
@@ -43,8 +42,7 @@ class TextMenu(object):
     def GetDefaults(prompt, defval):
         """Gets data from user providing a defualt option"""
         formatstr = "{}{}:{} [ {} ] " # Header color prompt with defualt in [ ]
-        response = input(formatstr.format(com.color.HEADER,prompt, com.color.END, defval))
-        if response == "":
+        if input(formatstr.format(com.color.HEADER,prompt, com.color.END, defval)) == "":
             return defval
         else:
             return response
