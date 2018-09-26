@@ -3,11 +3,10 @@
 # Python script to find and mount a filesystem and then rescue data at the file system level.
 # If this fails to mount the disk we may need to image the drive.
 
-import os, sys, re
-import shlex
+# TODO clean up import list
+import os, sys
 import time
-from subprocess import PIPE, Popen
-from module import com, disk
+from lib import com, disk
 
 # Variable resets.
 TargetDisk = None
@@ -16,6 +15,9 @@ RecoverDisk = None
 
 RecoverList = ['Movies','Games','Music']
 
+# TODO Start working on FDDRescue module.
+# finish workflow
+# set up file recovery task
 
 tmpFile = open("/tmp/rescue.sh", "w+")
 

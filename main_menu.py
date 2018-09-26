@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 
 ## Include Files Here
+import os, sys, time
 
-import time
-import os, sys
 from lib import com
 from menu import TextMenu
 from rescue import Recovery
@@ -13,7 +12,7 @@ def colorPrint(txt,colorStart):
 	print(colorStart+txt+'\033[0m') # Print in color then reset color on end of line.
 
 # Variable definistions
-_sleep_ = 5
+DELAY = 5
 MyOS = com._OS_()
 
 
@@ -42,8 +41,10 @@ MainMenu.Align(MainMenu_Headers[1],"l")
 MainMenu.Align(MainMenu_Headers[2],"l")
 RecoveryTypeMenu.Align(RecoveryTypeMenu_Headers[1],"l")
 RecoveryTypeMenu.Align(RecoveryTypeMenu_Headers[2],"l")
+
 ## Functions ##
-def ForkRecovery():
+def ForkRecovery(): ## Refactor This ##
+    """Fork recovery process"""
     pid = os.fork()
     if pid:
     # we are the parent
@@ -60,37 +61,33 @@ def ForkRecovery():
 
 def StartRescueTask():
     """Starts a rescue task"""
-        MyOS.Clear()
-        Task = Recovery()
-        TaskOptions = Task.GetConfigFromUser()
-        TaskOptions['LogFile'] = Task.GetLogName()
-        RecoveryTypeMenu.Print()
+    MyOS.Clear()
+    Task = Recovery()
+    TaskOptions = Task.GetConfigFromUser()
+    TaskOptions['LogFile'] = Task.GetLogName()
+    RecoveryTypeMenu.Print()
 
-        for case in com.switch(input('Recovery Type []: ').lower()):
-            print("\n\n") # padd down a few lines then print selected options.
-            if case('1'):
-                print("Full: {}".format(Task._RecoveryCMDbuilder_("full")))
-                break
-            if case('2'): # No Scrape
-                print("No Scrap: {}".format(Task._RecoveryCMDbuilder_("noscrape")))
-                break
-            if case('3'): # No trim
-                print("No Trim: {}".format(Task._RecoveryCMDbuilder_("notrim")))
-                break
-            if case('4'): # Single forward copy (large block size) good drive clone
-                print("Clone: {}".format(Task._RecoveryCMDbuilder_("clone")))
-                break
-            if case('r'):# Restarts the Recovery Setup
-                break
-            if case('b'):
-                print("Back to main Menu")
-                break
-            if case(): # default
-                print("Please make a valid selection.")
-			# restart the prompts
-
-        print("Selected Options."+com.color.OKBLUE)
-        print(com.color.END+com.color.WARNING+"Executing ddrescue."+com.color.END)
+    for case in com.switch(input('Recovery Type []: ').lower()):
+        print("\n\n") # padd down a few lines then print selected options.
+        if case('1'):
+            print("Full: {}".format(Task._RecoveryCMDbuilder_("full")))
+            break
+        if case('2'): # No Scrape
+            print("No Scrap: {}".format(Task._RecoveryCMDbuilder_("noscrape")))
+            break
+        if case('3'): # No trim
+            print("No Trim: {}".format(Task._RecoveryCMDbuilder_("notrim")))
+            break
+        if case('4'): # Single forward copy (large block size) good drive clone
+            print("Clone: {}".format(Task._RecoveryCMDbuilder_("clone")))
+            break
+        if case('r'):# Restarts the Recovery Setup
+            break
+        if case('b'):
+            print("Back to main Menu")
+            break
+        if case(): # default
+            print("Please make a valid selection.")
 
 
 def main():
@@ -104,31 +101,31 @@ def main():
         for case in com.switch(input("Select: ").lower()):
             if case("1"):
                 print("Running gsmart hdd diagnostics.")
-                time.sleep(_sleep_)
+                time.sleep(DELAY)
                 break
             if case("2"):
                 print("Calling ddrescue.")
-                time.sleep(_sleep_)
+                time.sleep(DELAY)
                 StartRescueTask()
                 break
             if case("3"):
                 print("Running rsync backup.")
-                time.sleep(_sleep_)
+                time.sleep(DELAY)
                 break
             if case("4"):
                 print("Starting Offline Regedit.")
-                time.sleep(_sleep_)
+                time.sleep(DELAY)
                 break
             if case("q"):
                 sys.exit()
             if case("s"):
                 print("Shutting down system")
-                time.sleep(_sleep_)
+                time.sleep(DELAY)
                 MyOS.Shutdown()
                 break
             if case("r"):
                 print("Rebooting system")
-                time.sleep(_sleep_)
+                time.sleep(DELAY)
                 MyOS.Reboot()
                 break
 

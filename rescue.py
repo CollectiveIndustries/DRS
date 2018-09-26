@@ -2,6 +2,7 @@
 
 # Python script to set variables and call ddrescue.
 
+# TODO clean up import list
 import os, sys
 import shlex
 from jproc import JSONProcess
@@ -159,7 +160,7 @@ class Recovery(object):
         with open(_lsblkDataFile_) as json_data:
             return json.load(json_data)
 
-    def _GetDevices_(self): # needs refactoring
+    def _GetDevices_(self): # TODO needs refactoring, this is part of Issue #1
         """Get devices from lsblk
         If Win32 OS load lsblkDump.json"""
         print(com.color.BOLD+"\nAttached Storage Devices.\n"+com.color.END)
