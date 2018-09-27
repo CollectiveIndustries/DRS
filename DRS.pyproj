@@ -32,6 +32,7 @@
     <Compile Include="jproc.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="lib\MyDisk.py" />
     <Compile Include="menu.py">
       <SubType>Code</SubType>
     </Compile>
@@ -41,7 +42,6 @@
     <Compile Include="lib\com.py" />
     <Compile Include="lib\config.py" />
     <Compile Include="lib\dbcon.py" />
-    <Compile Include="lib\disk.py" />
     <Compile Include="lib\__init__.py" />
     <Compile Include="main_menu.py" />
   </ItemGroup>

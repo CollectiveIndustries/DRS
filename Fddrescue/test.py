@@ -22,4 +22,12 @@ def SetTree(newpath):
     mkdir = Popen(disk.prog.mkdir, stdout=PIPE, stderr=PIPE)
     out, err = mkdir.communicate()
 
-print(GetTree('/etc'))
+def list_files(startpath):
+    """Grab directory tree from startpath"""
+    for root, dirs, files in os.walk(startpath):
+        level = root.replace(startpath, '').count(os.sep)
+        indent = ' ' * 4 * (level)
+        print('{}{}/'.format(indent, os.path.basename(root)))
+        subindent = ' ' * 4 * (level + 1)
+        for f in files:
+            print('{}{}'.format(subindent, f))

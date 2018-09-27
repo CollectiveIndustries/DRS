@@ -2,7 +2,7 @@
 
 ## Include Files Here
 import os, sys, time
-
+import test
 from lib import com
 from menu import TextMenu
 from rescue import Recovery
@@ -22,6 +22,7 @@ MainMenu_Items = {"1":["GsmartControl","Harddrive Diagnostics"],
                   "2":["GNU ddrescue","Hard drive recovery + sector cloning"],
                   "3":["Rsync","Backup file systems to drive or server"],
                   "4":["Chntpw","Offline Windows password reset"],
+                  "T":["Test Python","Runs a method directly for developing"],
                   "Q":["Quit","Closes terminal window"],
                   "S":["Shutdown","Power down System"],
                   "R":["Reboot","Reboot system (warm boot)"]}
@@ -99,6 +100,12 @@ def main():
     
         MainMenu.Print()
         for case in com.switch(input("Select: ").lower()):
+            if case("t"):
+                print("Running Test module")
+                time.sleep(DELAY)
+                list_files("/mnt/d/Nvidia Videos","/mnt/d/NEWPATH")
+                sys.exit()
+                break
             if case("1"):
                 print("Running gsmart hdd diagnostics.")
                 time.sleep(DELAY)
@@ -128,6 +135,18 @@ def main():
                 time.sleep(DELAY)
                 MyOS.Reboot()
                 break
+
+def list_files(oldPath,newPath):
+    """Grab directory tree from startpath"""
+    for root, dirs, files in os.walk(oldPath):
+        #level = root.replace(startpath, '').count(os.sep)
+        #indent = ' ' * 4 * (level)
+        #print('{}{}{}/{}'.format(indent,com.color.OKBLUE, os.path.basename(root), com.color.END))
+        print('{}{}/{}'.format(com.color.OKBLUE, root, com.color.END))
+        print('{}{}/{}'.format(com.color.WARNING, root.replace(oldPath,newPath,1), com.color.END))
+        #subindent = ' ' * 4 * (level + 1)
+        for f in files:
+            print('{}{}{}'.format(com.color.OKGREEN, f, com.color.END))
 
 # start program here
 if __name__ == "__main__":

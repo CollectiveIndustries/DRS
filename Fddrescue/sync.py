@@ -126,7 +126,7 @@ while Question is None:
 
 	except (ValueError, KeyError, TypeError):
 		print(color.FAIL+"There was a problem parsing the JavaScript Object Notation (JSON)"+color.END)
-		print(ValueError.msg)
+		print(ValueError)
 		exit(1)
 
 # Ask user which drive they want to recover
