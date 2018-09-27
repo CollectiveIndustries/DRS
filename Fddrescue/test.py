@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 from subprocess import STDOUT,  PIPE, Popen, check_output, CalledProcessError
 
 # TODO 3 rename test.py to pathbuilder.py

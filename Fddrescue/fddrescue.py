@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 # Python script to find and mount a filesystem and then rescue data at the file system level.
 # If this fails to mount the disk we may need to image the drive.
 

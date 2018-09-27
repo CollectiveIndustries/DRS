@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 # Python script to set variables and call ddrescue.
 
 import os, sys, shlex, time
