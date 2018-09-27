@@ -20,10 +20,15 @@ class JSONProcess:
         self.result = None
         self.proc = None
 
+    def _loadJsonDump_(self):
+        """Pulls a JSON file returns the data.
+        Used primarily for debugging"""
+        with open(_lsblkDataFile_) as json_data:
+            return json.load(json_data)
+
     def start(self):
         """Start the subprocess"""
-        self.proc = subprocess.Popen(self.cmdline, stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE, cwd=self.cwd, bufsize=JSONProcess.PROCESS_BUF_SIZE)
+        self.proc = subprocess.Popen(self.cmdline, stdout=subprocess.PIPE,stderr=subprocess.PIPE, cwd=self.cwd, bufsize=JSONProcess.PROCESS_BUF_SIZE)
 
     def is_finished(self):
         """
@@ -63,7 +68,7 @@ class JSONProcess:
             print_warning('failed to parse JSON from a JSONProcess: {}'.format(self.name))
             self.result = {'stderr': truncate_string(err, JSONProcess.MAX_JSON_PROCESS_RESULT_LENGTH),
                            'stdout': truncate_string(out, JSONProcess.MAX_JSON_PROCESS_RESULT_LENGTH)}
-            print_emph(self.result)
+        print_emph(self.result)
         return self.result
 
     def wait_task(self, timeout):
