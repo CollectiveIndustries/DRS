@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 ## Include Files Here
-import os, sys, time
+import os, sys, time, math
 import test
 from lib import com
 from menu import TextMenu
@@ -23,6 +23,7 @@ MainMenu_Items = {"1":["GsmartControl","Harddrive Diagnostics"],
                   "3":["Rsync","Backup file systems to drive or server"],
                   "4":["Chntpw","Offline Windows password reset"],
                   "T":["Test Python","Runs a method directly for developing"],
+                  "F":["Factorize","Get Prime factors for Inuput"],
                   "Q":["Quit","Closes terminal window"],
                   "S":["Shutdown","Power down System"],
                   "R":["Reboot","Reboot system (warm boot)"]}
@@ -100,10 +101,13 @@ def main():
     
         MainMenu.Print()
         for case in com.switch(input("Select: ").lower()):
+            if case("f"):
+                print(prime_factors(int(input("Get Primes for: "))))
+                time.sleep(DELAY*2)
             if case("t"):
                 print("Running Test module")
                 time.sleep(DELAY)
-                list_files("/mnt/d/Nvidia Videos","/mnt/d/NEWPATH")
+                RecoverDirTree("/mnt/d/Nvidia Videos","/mnt/d/NEWPATH")
                 sys.exit()
                 break
             if case("1"):
@@ -136,17 +140,46 @@ def main():
                 MyOS.Reboot()
                 break
 
-def list_files(oldPath,newPath):
+def prime_factors(n):
+    """Returns Prime factors for :input: n"""
+    i = 2
+    factors = []
+    while i * i <= n:
+        if n % i:
+            i += 1
+        else:
+            n //= i
+            factors.append(i)
+    if n > 1:
+        factors.append(n)
+    return factors
+
+def RecoverDirTree(oldPath,newPath):
     """Grab directory tree from startpath"""
-    for root, dirs, files in os.walk(oldPath):
-        #level = root.replace(startpath, '').count(os.sep)
-        #indent = ' ' * 4 * (level)
-        #print('{}{}{}/{}'.format(indent,com.color.OKBLUE, os.path.basename(root), com.color.END))
+    #Traverse directory tree
+    for (root,dirs,files) in os.walk(oldPath):
         print('{}{}/{}'.format(com.color.OKBLUE, root, com.color.END))
         print('{}{}/{}'.format(com.color.WARNING, root.replace(oldPath,newPath,1), com.color.END))
-        #subindent = ' ' * 4 * (level + 1)
+
+        #Repeat for each file in directory
         for f in files:
+            fstat = os.stat(os.path.join(root,f))
             print('{}{}{}'.format(com.color.OKGREEN, f, com.color.END))
+        # Convert file size to MB, KB or Bytes
+            if (fstat.st_size > 1024 * 1024):
+                fsize = math.ceil(fstat.st_size / (1024 * 1024))
+                unit = "MB"
+            elif (fstat.st_size > 1024):
+                fsize = math.ceil(fstat.st_size / 1024)
+                unit = "KB"
+            else:
+                fsize = fstat.st_size
+                unit = "B"
+
+            mtime = time.strftime("%X %x", time.gmtime(fstat.st_mtime))
+        
+             # Print file attributes
+            print('\t{:15.15s}{:8d} {:2s} {:18s}'.format(f,fsize,unit,mtime))
 
 # start program here
 if __name__ == "__main__":
