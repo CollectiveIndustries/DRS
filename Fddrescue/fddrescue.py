@@ -50,7 +50,7 @@ while RecoverPart.lower() == 'r':
 	disk.mount(RecoverPart,'/mnt','ntfs',0)
 	time.sleep(5)
 	for item in RecoverList:
-		for OldPath in disk.GetTree('/mnt/'+item):
+		for OldPath in disk.GetTree('/mnt/'+item): # TODO https://www.opentechguides.com/how-to/article/python/78/directory-file-list.html
 			NewPath = OldPath.replace('/mnt','/media/root/4a6c65b0-7cf1-4139-b210-d52b562cae24/recovered',1)
 			disk.SetTree(NewPath)
 #			print("{}mkdir -p {}{}".format(com.color.OKGREEN,NewPath,com.color.END))
