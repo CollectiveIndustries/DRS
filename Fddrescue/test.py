@@ -1,20 +1,33 @@
-#!/usr/bin/env python
+from subprocess import STDOUT,  PIPE, Popen, check_output, CalledProcessError
 
-import json
-import subprocess
+# TODO 3 rename test.py to pathbuilder.py
+# make sure these work
 
-block_list = ['lsblk', '--json', '-nd', '-o', 'name,size,model,serial']
+# module functions as follows:
+# Get entire tree starting from path and return
+# Mkdir of path starting from newpath
 
-dsk = subprocess.Popen(block_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+# can we please stop using Popen and subprocess for EVERYTHING i mean i know its great but holy crap overboard much?
+def GetTree(path='/mnt'):
+    """Gets a file tree"""
+    disk.prog.find[1]=path
+    find = Popen(disk.prog.find, stdout=PIPE, stderr=PIPE)
+    out, err = find.communicate()
+    return([s.strip() for s in out.splitlines()])
 
-out, err = dsk.communicate()
+# TODO 4 more pythonic way of doing this?
+def SetTree(newpath):
+    """Rebuilds file tree at path"""
+    disk.prog.mkdir[2] = newpath
+    mkdir = Popen(disk.prog.mkdir, stdout=PIPE, stderr=PIPE)
+    out, err = mkdir.communicate()
 
-try:
-    decoded = json.loads(out)
-
-    # Access data
-    for x in decoded['blockdevices']:
-        print "Drive: "+x['name']+" is "+x['size']
-
-except (ValueError, KeyError, TypeError):
-    print "lsblk returned the wrong JSON format"
+def list_files(startpath):
+    """Grab directory tree from startpath"""
+    for root, dirs, files in os.walk(startpath):
+        level = root.replace(startpath, '').count(os.sep)
+        indent = ' ' * 4 * (level)
+        print('{}{}/'.format(indent, os.path.basename(root)))
+        subindent = ' ' * 4 * (level + 1)
+        for f in files:
+            print('{}{}'.format(subindent, f))

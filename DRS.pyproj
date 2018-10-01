@@ -1,0 +1,53 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{b61a3efc-1177-4dd0-8e35-a1f96cf51bec}</ProjectGuid>
+    <ProjectHome />
+    <StartupFile>main_menu.py</StartupFile>
+    <SearchPath>lib\;conf\;support_scripts\</SearchPath>
+    <WorkingDirectory>.</WorkingDirectory>
+    <OutputPath>.</OutputPath>
+    <ProjectTypeGuids>{888888a0-9f3d-457c-b088-3a5042f75d52}</ProjectTypeGuids>
+    <LaunchProvider>Standard Python launcher</LaunchProvider>
+    <InterpreterId />
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'" />
+  <PropertyGroup>
+    <VisualStudioVersion Condition=" '$(VisualStudioVersion)' == '' ">10.0</VisualStudioVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <Content Include=".gitignore" />
+    <Content Include="lsblkDump.json" />
+    <Content Include="README.md" />
+    <Content Include="reginfo.txt" />
+    <Content Include="requirements.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="fddrescue.py" />
+    <Compile Include="Fddrescue\ExcludeConvert.py" />
+    <Compile Include="Fddrescue\fddrescue.py" />
+    <Compile Include="jproc.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="lib\MyDisk.py" />
+    <Compile Include="menu.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="rescue.py" />
+    <Compile Include="Fddrescue\sync.py" />
+    <Compile Include="Fddrescue\test.py" />
+    <Compile Include="lib\com.py" />
+    <Compile Include="lib\config.py" />
+    <Compile Include="lib\dbcon.py" />
+    <Compile Include="lib\__init__.py" />
+    <Compile Include="main_menu.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Fddrescue" />
+    <Folder Include="lib" />
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
+</Project>

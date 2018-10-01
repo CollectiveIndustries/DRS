@@ -2,26 +2,29 @@
 
 # Set Common Config variables here
 LAN_ADDY=192.168.0.0/24
-DESKTOP_WALLPAPER=/media/cw/Drew/Live_USB/background/Background.png
-USB_SPLASH=/media/cw/Drew/Live_USB/background/cwsplash.png
+DESKTOP_WALLPAPER=/media/cw/Live_USB/background/Background.png
+USB_SPLASH=/media/cw/Live_USB/background/cwsplash.png
 ICON_CACHE=/usr/share/icons/cw
-VARIANT=light
-ARCH=i386
-GCONF_OVERRIDES=/usr/share/glib-2.0/schemas/
-PASSWORD=toor
+
+CWD=$PWD
 
 # clear the work space and start configuration
 clear
 apt-get autoclean --force-yes -y
 apt-get autoremove --force-yes -y
-proxychains apt-get update
-proxychains apt-get dist-upgrade --force-yes -y
+#proxychains apt-get update
+#proxychains apt-get dist-upgrade --force-yes -y
+
+apt-get update
+apt-get install live-build git cdebootstrap -y
+#apt-get dist-upgrade -y
 
 # use the proxy tunnel or regular git clone place the resulting repository in the Home SOURCE Directory.
-cd ..
+cd .. || exit
 
-proxychains git clone git://git.kali.org/live-build-config.git
-#git clone git://git.kali.org/live-build-config.git
+#proxychains git clone git://git.kali.org/live-build-config.git
+git clone git://git.kali.org/live-build-config.git
+
 
 # change to the working directory so we can run the base distro config scripts
 cd live-build-config || exit
@@ -29,10 +32,9 @@ cd live-build-config || exit
 # make the directory paths for the live build
 mkdir -p kali-config/common/includes.chroot/usr/share/wallpapers/kali/contents/images/
 mkdir -p kali-config/common/includes.chroot/etc/apt/apt.conf.d/
-mkdir -p kali-config/common/includes.chroot/home/user/Desktop
+mkdir -p kali-config/common/includes.chroot/etc/xdg/autostart/
 mkdir -p kali-config/common/includes.chroot/usr/share/icons/cw/
-mkdir -p kali-config/common/includes.chroot/opt/cw/shared
-mkdir -p kali-config/common/includes.chroot
+#mkdir -p kali-config/common/includes.chroot/root/Desktop
 #mkdir -p kali-config/common/includes.chroot/opt/
 
 # Copy files from local repository into live FileSystem
@@ -50,12 +52,12 @@ umount -l /media/cw
 #cp ~/Desktop/* kali-config/common/includes.chroot/root/Desktop/
 
 # copy file from user provided locations
-cp $DESKTOP_WALLPAPER kali-config/common/includes.chroot/usr/share/wallpapers/kali/contents/Background.png
+cp $DESKTOP_WALLPAPER kali-config/common/includes.chroot/usr/share/wallpapers/kali/contents
 cp $ICON_CACHE/* kali-config/common/includes.chroot/usr/share/icons/cw/
 
 
 # grab the local Favorites bar before building the script below
-FAVORITES=$(dconf read /org/gnome/shell/favorite-apps)
+#FAVORITES=$(dconf read /org/gnome/shell/favorite-apps)
 echo "Setting up favorites bar with $FAVORITES"
 # We add a chroot hook and set up the wallpaper
 # BUG: This isnt actualy setting any of the user customizaions durring the image process.
@@ -68,29 +70,22 @@ cat > kali-config/common/hooks/gnome.chroot <<EOF
 set -e
 
 # Set background and interface theme
-dbus-launch --exit-with-session gsettings set org.gnome.desktop.background picture-uri 'file:///usr/share/wallpapers/kali/contents/Background.png'
+#dbus-launch --exit-with-session gsettings set org.gnome.desktop.background picture-uri 'file:///usr/share/wallpapers/kali/contents/images/Background.png'
 
 # Set favorites bar to reflect the local system
-dbus-launch --exit-with-session gsettings set org.gnome.shell favorite-apps "$FAVORITES"
+#dbus-launch --exit-with-session gsettings set org.gnome.shell favorite-apps "$FAVORITES"
 
 EOF
 
 # Set up custom packages here for building the ISO
-cat <<EOF > kali-config/variant-$VARIANT/package-lists/cw.list.chroot
+cat <<EOF > kali-config/variant-gnome/package-lists/cw.list.chroot
 # Tools used by Computer Wherehouse
-
-# Partition tools
-gparted
-ntfs-3g
-
-# Password reset for windows
-chntpw
 
 # Forensics tools
 gddrescue
 ddrescueview
 
-# Bare Metal Backups
+# Bare metal backup / Forensics Imaging
 # package lookup seems to be broken on the preconfigured repositories for clonezilla
 #clonzilla
 
@@ -99,10 +94,33 @@ gsmartcontrol
 
 # Resource usage
 htop
+gdmap
 ncdu
+
+# Stress Testing
+stress
+
+# Hardware information
+hardinfo
+lm-sensors
 
 # Windows Networking compatibility
 cifs-utils
+
+# Anti-virus Software
+#clamav
+
+# VNC Network Client and remote desktop
+#vinagre
+
+# possible application/libraries
+#libblkid-dev
+
+# precision calculator
+#bc
+
+#Python library installer for some package dependancies
+#python-pip
 
 EOF
 
@@ -110,7 +128,7 @@ EOF
 
 cat <<EOF > kali-config/common/includes.chroot/root/.bash_aliases
 # Use dcfldd for more information instead of dd grab a size of our input file and provide a time estimate + percent done
-alias dd='dcfldd sizeprobe=if'
+#alias dd='dcfldd sizeprobe=if'
 
 # Show mount points in a nice Table
 alias showfs='(printf "Device Mountpoint File_System_Type\n"; mount | cut -d " " -f 1-5 | sed "s:on::g" | sed "s:type::g") | column -t'
@@ -127,6 +145,11 @@ alias rsync='rsync --partial --progress --times --recursive --compress --human-r
 # Show Devices currently attached to system. Set some defualt values to display
 alias lsblk='lsblk -o name,label,size,fstype,model'
 
+# Set up some defualt options for Clam AV
+# (Recursive scan, sound a bell on Positive detections)
+# make a directory and move viruses to the clam_vault at the base of the scan
+#alias clamscan='mkdir ./clam_vault; clamscan --recursive=yes --bell --move=./clam_vault'
+
 # Setup ddrescue defualts
 # (Direct disk access, Force overwrite, Reopen the Drive on Error, and set the default copy size to 1024)
 # 1024 cluster size with the --no-scrape --no-trim --cpass=1 options makes a fairly decent block by block cloner
@@ -137,6 +160,9 @@ alias diff='diff --color=always'
 
 EOF
 
+# Case insensitive Regular Expression matching for Windows names >..<
+# Ignores hibernation file, Pagefile, temporary files, temp internet files, HitmanPro, Windows Prefetch, and cookies.
+cat $CWD/Fddrescue/rsync_exclude.conf > kali-config/common/includes.chroot/etc/rsync_exclude.conf
 
 cat <<EOF >kali-config/common/includes.chroot/root/.selected_editor
 # Generated by /usr/bin/select-editor
@@ -153,6 +179,7 @@ Aquire::CompressionTypes::Order::"gz";
 EOF
 
 # Add mount points and automount data drives
+# Update ClamAV on boot
 cat <<EOF > kali-config/common/includes.chroot/etc/rc.local
 #!/bin/bash
 
@@ -161,15 +188,19 @@ mkdir -p /media/cw
 mkdir -p /media/tech
 mkdir -p /media/data
 
+# Get ethernet online
+#ifup eth0
+
 # Mount CW NAS shares providing username/password and mount points durring boot
 mount -t cifs //192.168.0.241/data -o username=root,password=cw8400 /media/data
 mount -t cifs //192.168.0.241/tech -o username=root,password=cw8400 /media/tech
 mount -t cifs //192.168.0.241/cw   -o username=root,password=cw8400 /media/cw
 EOF
 
+chmod a+x kali-config/common/includes.chroot/etc/rc.local
 
 # XDG Autostart desktop applications
-cat <<EOF > kali-config/common/includes.chroot/home/user/Desktop/Gsmart.desktop
+cat <<EOF > kali-config/common/includes.chroot/etc/xdg/autostart/Gsmart.desktop
 [Desktop Entry]
 Name=GSmart
 GenericName=Hdd Diagnostics
@@ -177,7 +208,7 @@ Comment=Auto start the Gsmart Control HDD Diagnostics system on start
 Exec=/usr/bin/gsmartcontrol
 Terminal=false
 Type=Application
-X-GNOME-Autostart-enabled=false
+X-GNOME-Autostart-enabled=true
 
 EOF
 
@@ -185,35 +216,11 @@ EOF
 # BUG: chroot hooks dont seem to be excecuted properly so were cloning the entire working environment
 echo rebuilding profiles
 
-#cp -rfv ~/.config kali-config/common/includes.chroot/home/user/
+#cp -rf ~/.config kali-config/common/includes.chroot/root/
 
 echo changing permissions
 
-chmod 755 kali-config/common/hooks/live/gnome.chroot
-chmod a+x kali-config/common/includes.chroot/etc/rc.local
-chmod a+x kali-config/common/includes.chroot/opt/cw/rescue
-chmod a+x kali-config/common/includes.chroot/opt/cw/backup
+chmod 755 kali-config/common/hooks/gnome.chroot
 
-echo running verbose build
 # Run the build
-./build.sh --distribution kali-rolling --verbose --variant $VARIANT --arch $ARCH
-
-# Unmount filesystems so we know theres nothign there
-umount -l /mnt/loop
-umount -l /media/cw
-
-# Mount the Kali-Linux iso and the Server/cw share so we can copy files around
-mount images/kali-linux-$VARIANT-rolling-$ARCH.iso /mnt/loop
-mount -t cifs //192.168.0.241/cw   -o username=root,password=cw8400 /media/cw
-
-# Copy squash filesystem into the web root folder were the PXE server expects to find it
-cp -v /mnt/loop/live/filesystem.squashfs /var/www/html/live/kali/filesystem.squashfs
-
-# Copy the kernel over to the shared server so that the PXE can grab it using a soft-link
-cp -v /mnt/loop/live/{initrd.img,vmlinuz} /media/cw/Drew/PXE_Server/
-
-# unmount the filesystems we just mounted and finish the build processes
-umount -l /mnt/loop
-umount -l /media/cw
-
-echo Build finished
+./build.sh --distribution kali-rolling --verbose
