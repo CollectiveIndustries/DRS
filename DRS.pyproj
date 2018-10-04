@@ -35,6 +35,9 @@
     <Compile Include="menu.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="module1.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="SMART-lib.py">
       <SubType>Code</SubType>
     </Compile>

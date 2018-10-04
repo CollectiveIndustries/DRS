@@ -79,16 +79,6 @@ class Recovery(object):
         else:
             return [frmtStrLng.format("cluster-size",clusterSize), frmtStrLng.format("skip-size",skipSize),frmtStrLng.format("cpass",copyPass) ] + optLst
 
-    def NasMount(): # Needs refactoring Might be moved to a NAS Storage handler
-        try:
-            print("Mounting Storage Server....")
-            err = check_output(RescueMount)
-            print(com.color.OKGREEN+"Server Drive Mounted."+com.color.END)
-            time.sleep(10)
-        except CalledProcessError as ERROR:
-            print(com.color.FAIL+"ERROR while mounting "+RescueMount[3]+'\nReturned with Error:\n>>>> '+str(ERROR)+com.color.END)
-            exit(ERROR.returncode)
-
     def _DisplayConfigChanges_(self,_newConf_={}):
         """Prints out a side by side view of the configuration settings"""
         self._SettingsTable_.clear_rows() # clean out the table and rebuild a new one with current settings
