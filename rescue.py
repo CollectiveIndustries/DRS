@@ -28,14 +28,36 @@ def _PrtDriveParam(head='', pstr=None, color=''):
 # Mount options for the CIFS server share
 RescueMount = ['mount', '-o', 'username=root,password=cw8400,nocase', '//nas/data', '/media/data']
 
-# Block listing with json format so we can parse the device list
-block_list = ['lsblk', '--json', '--noheadings', '--nodeps', '-o', 'name,size,model,serial,fstype']
-
 # file system repair after the clone or rescue we need to reset bad blocks and journal files.
 NtfsFix = ['ntfsfix', '--clear-bad-sectors', '--clean-dirty']
 
 # Make Directory Path just incase it doesnt exist
 MkDir = ['mkdir','-p']
+
+def lsblk():
+    global debug
+
+    if not debug:
+        # Block listing with json format so we can parse the device list
+        block_list = ['lsblk', '--json', '--noheadings', '--nodeps', '-o', 'name,size,model,serial,fstype']
+        try:
+            lsblk = Popen(block_list, stdout=PIPE, stderr=PIPE)
+            out, err = lsblk.communicate()
+        except OSError as _e_:
+            print("{}Returned with Error:\n>>>>{}\n>>>>{}\n{}".format(com.color.FAIL,_e_.errno,_e_.strerror,com.color.END))
+    
+        try:
+            decoded = json.loads(out.decode())
+        except (ValueError, KeyError, TypeError) as e: # LSBLK is also not in the Linux Subshell for Windows
+            print("[{}FAIL{}] lsblk returned the wrong JSON format".format(com.color.FAIL,com.color.END))
+            print("{}Returned with:\n>>>{}{}".format(com.color.FAIL,out,com.color.END))
+            print(str(e)) # the JSON object must be str, not 'bytes'
+            print("Using json dump instead!! {}WARNING{} Falling back in debug mode.".format(com.color.WARNING,com.color.END))
+            #decoded = self._loadJsonDump_()
+            debug = True
+    else: # LSBLK is unsupported on windows use the JSON test data from the Kali Linux VM instead
+        decoded = _loadJsonDump_()
+    return decoded
 
 class Recovery(object):
     """Defines a Recovery Task Object"""
@@ -156,38 +178,16 @@ class Recovery(object):
         print(com.color.BOLD+"\nAttached Storage Devices.\n"+com.color.END)
         UserOptions = self._config_
         _FSignore_ = ['iso9660', 'squashfs']
-        global debug
 
         # Load data from provider
-        if not debug:
-            try:
-                lsblk = Popen(block_list, stdout=PIPE, stderr=PIPE)
-                out, err = lsblk.communicate()
-            except OSError as _e_:
-                print("{}Returned with Error:\n>>>>{}\n>>>>{}\n{}".format(com.color.FAIL,_e_.errno,_e_.strerror,com.color.END))
-
-            try:
-                decoded = json.loads(out.decode())
-            except (ValueError, KeyError, TypeError) as e: # LSBLK is also not in the Linux Subshell for Windows
-                print("[{}FAIL{}] lsblk returned the wrong JSON format".format(com.color.FAIL,com.color.END))
-                print("{}Returned with:\n>>>{}{}".format(com.color.FAIL,out,com.color.END))
-                print(str(e)) # the JSON object must be str, not 'bytes'
-                print("Using json dump instead!! {}WARNING{} Falling back in debug mode.".format(com.color.WARNING,com.color.END))
-                decoded = self._loadJsonDump_()
-                debug = True
-        else: # LSBLK is unsupported on windows use the JSON test data from the Kali Linux VM instead
-            decoded = self._loadJsonDump_()
-
+        BlckDev = lsblk()
         DefVal = False
-        for x in decoded['blockdevices']:
-            if x['fstype'] not in _FSignore_: # Make sure we list only valid drives and are NOT in the Ignore list
-                _PrtDriveParam("Drive:  ", x['name'],   com.color.OKGREEN)
-                _PrtDriveParam("Size:   ", x['size'],   com.color.WARNING)
-                _PrtDriveParam("Serial: ", x['serial'], com.color.BOLD)
+        for block in BlckDev['blockdevices']:
+            if block['fstype'] not in _FSignore_: # Make sure we list only valid drives and are NOT in the Ignore list
+                _PrtDriveParam("Drive:  ", block['name'],   com.color.OKGREEN)
+                _PrtDriveParam("Size:   ", block['size'],   com.color.WARNING)
+                _PrtDriveParam("Serial: ", block['serial'], com.color.BOLD)
+                print("") # add a blank line at the end of each group as some values may not print
                 if not DefVal:
-                    self._config_['RecoveryDisk'] = '/dev/{}'.format(x['name'])
+                    self._config_['RecoveryDisk'] = '/dev/{}'.format(block['name'])
                     DefVal = True
-
-                if x['serial'] is not None:
-                    
-                    print("") # add a blank line at the end of each group as some values may not print
