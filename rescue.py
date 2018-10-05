@@ -1,6 +1,6 @@
 # Python script to set variables and call ddrescue.
 
-import os, sys, shlex, time
+import os, sys, shlex, time, json
 from jproc import JSONProcess
 from subprocess import STDOUT,  PIPE, Popen, check_output, CalledProcessError
 from datetime import date
@@ -16,8 +16,17 @@ _lsblkDataFile_ = "lsblkDump.json"
 if MyOS._type_ == "win32":
     debug = True
 
+## Helper Methods
+def _PrtDriveParam(head='', pstr=None, color=''):
+    """Format input and print header with option"""
+    if pstr is not None:
+        pstr = "{}{}{}".format(color,pstr,com.color.END) # force string color normal again just incase
+        print("{}{} {}{}".format(com.color.HEADER,head,com.color.END,pstr))
+    else:
+        print("{}{}: None".format(com.color.HEADER,head,com.color.END))
+
 # Mount options for the CIFS server share
-RescueMount = ['mount', '-o', 'username=root,password=cw8400,nocase', '//nas/data','/media/data']
+RescueMount = ['mount', '-o', 'username=root,password=cw8400,nocase', '//nas/data', '/media/data']
 
 # Block listing with json format so we can parse the device list
 block_list = ['lsblk', '--json', '--noheadings', '--nodeps', '-o', 'name,size,model,serial,fstype']
@@ -141,13 +150,13 @@ class Recovery(object):
 
     # TODO 1 EXCEPTION on json import, refactor and move to jproc module
 
-
     def _GetDevices_(self): # TODO 0 needs refactoring, this is part of Issue #1
         """Get devices from lsblk
         If Win32 OS load lsblkDump.json"""
         print(com.color.BOLD+"\nAttached Storage Devices.\n"+com.color.END)
         UserOptions = self._config_
         _FSignore_ = ['iso9660', 'squashfs']
+        global debug
 
         # Load data from provider
         if not debug:
@@ -158,23 +167,27 @@ class Recovery(object):
                 print("{}Returned with Error:\n>>>>{}\n>>>>{}\n{}".format(com.color.FAIL,_e_.errno,_e_.strerror,com.color.END))
 
             try:
-                json.loads(myResponse.content.decode(chardet.detect(myResponse.content)["encoding"]))
-                decoded = json.loads(out)
+                decoded = json.loads(out.decode())
             except (ValueError, KeyError, TypeError) as e: # LSBLK is also not in the Linux Subshell for Windows
                 print("[{}FAIL{}] lsblk returned the wrong JSON format".format(com.color.FAIL,com.color.END))
                 print("{}Returned with:\n>>>{}{}".format(com.color.FAIL,out,com.color.END))
                 print(str(e)) # the JSON object must be str, not 'bytes'
                 print("Using json dump instead!! {}WARNING{} Falling back in debug mode.".format(com.color.WARNING,com.color.END))
                 decoded = self._loadJsonDump_()
+                debug = True
         else: # LSBLK is unsupported on windows use the JSON test data from the Kali Linux VM instead
             decoded = self._loadJsonDump_()
-            
+
+        DefVal = False
         for x in decoded['blockdevices']:
             if x['fstype'] not in _FSignore_: # Make sure we list only valid drives and are NOT in the Ignore list
-                print(com.color.HEADER+"Drive:  "+com.color.OKGREEN+"/dev/"+x['name']+com.color.END)
-                print(com.color.HEADER+"Size:   "+com.color.WARNING+x['size']+com.color.END)
-            if x['model'] is not None:
-                print(com.color.HEADER+"Model:  "+com.color.END+x['model'])
-            if x['serial'] is not None:
-                print(com.color.HEADER+"Serial: "+com.color.END+x['serial'])
-                print("") # add a blank line at the end of each group as some values may not print
+                _PrtDriveParam("Drive:  ", x['name'],   com.color.OKGREEN)
+                _PrtDriveParam("Size:   ", x['size'],   com.color.WARNING)
+                _PrtDriveParam("Serial: ", x['serial'], com.color.BOLD)
+                if not DefVal:
+                    self._config_['RecoveryDisk'] = '/dev/{}'.format(x['name'])
+                    DefVal = True
+
+                if x['serial'] is not None:
+                    
+                    print("") # add a blank line at the end of each group as some values may not print
