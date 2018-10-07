@@ -69,8 +69,8 @@ def ReadableSize(fstat):
         unit = "B"
     return fsize, unit
 
-def RecoverDirTree(oldPath, newPath):
-    """Grab directory tree from startpath"""
+def RecoverDirTree(oldPath, newPath, RecoveryOps):
+    """Grab directory tree from startpath."""
     for (root,dirs,files) in os.walk(oldPath):
         MkPath = '{}'.format(root.replace(oldPath,newPath,1))
         pathlib.Path(MkPath).mkdir(parents=True, exist_ok=True) # Create Target DIR
@@ -79,12 +79,20 @@ def RecoverDirTree(oldPath, newPath):
             OldFile = '{}/{}'.format(root,f)
             NewFile = '{}/{}'.format(root.replace(oldPath,newPath,1),f)
             fsize, unit = ReadableSize(os.stat(os.path.join(root,f)))
-            
-            # Print file attributes
-            print('{:20s}{:8d} {:2s}'.format(f,fsize,unit))
 
             # TODO call DDRescue
-            print("ddrescue OPTIONS {} {} MAPFILE".format(OldFile,NewFile))
+            print("{}\t--->\t{}\t{:8d} {:2s}".format(OldFile,NewFile,fsize,unit))
+            BLKRecovery(RecoveryOps,OldFile,NewFile)
+
+def BLKRecovery(ops=[], blkdevin='', blkdevout='', mapFile=''):
+    """Calls ddrescue with the current configuration"""
+    cmdLst = ["ddrescue"] + ops
+    cmdLst.append(blkdevin)
+    cmdLst.append(blkdevout)
+    cmdLst.append(mapFile)
+    print(cmdLst)
+    rescue = Popen(cmdLst, stderr=PIPE)
+
 
 class Recovery(object):
     """Defines a Recovery Task Object"""
@@ -111,13 +119,17 @@ class Recovery(object):
                          'CustomerFirstName':None,
                          'CustomerLastName':None,
                          'TechInitials':None,
-                         'RecoveryDisk':'/dev/sda',
+                         'RecoveryDisk':None, # program gets first block device in list as default
                          'TargetDisk':None,
-                         'LogPath':'/log/',
+                         'LogPath':'/var/log',
                          'LogFile':''
                         }
+    def Start(self,recType):
+        """Start the recovery with the current object settings."""
+        mapFile = "{}/{}".format(self._config_['LogPath'],self.GetLogName())
+        BLKRecovery(self.GetOps(recType),self._config_['RecoveryDisk'],self._config_['TargetDisk'],mapFile)
 
-    def _RecoveryCMDbuilder_(self,type='full'):
+    def GetOps(self,recType='full'):
         """Returns recovery options based on type.
         full, noscrape, notrim, clone
         """
@@ -129,10 +141,10 @@ class Recovery(object):
         skipSize = self._config_['skip-size']
         copyPass = self._config_['cpass']
 
-        for o in self._recoveryType_[type]:
+        for o in self._recoveryType_[recType]:
             optLst += [frmtStrSrt.format(o)]
 
-        if type == 'clone':
+        if recType == 'clone':
             return [frmtStrLng.format("cluster-size",clusterSize),frmtStrLng.format("cpass","1")] + optLst
         else:
             return [frmtStrLng.format("cluster-size",clusterSize), frmtStrLng.format("skip-size",skipSize),frmtStrLng.format("cpass",copyPass) ] + optLst
@@ -190,13 +202,6 @@ class Recovery(object):
     def _GetConfig(self,name):
         """Gets value by name"""
         return self._config_[name]
-
-    def DoRecovery(self):
-        """Calls ddrescue with the current configuration"""
-        try:
-            rescue = Popen([],  stderr=PIPE)
-        except:
-            print("Error trying to call rescue")
 
     # TODO 1 EXCEPTION on json import, refactor and move to jproc module
 

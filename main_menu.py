@@ -66,27 +66,29 @@ def StartRescueTask():
     """Starts a rescue task"""
     Task = Recovery()
     InvalidResponse = True
+    RecOption = ""
     while True and InvalidResponse:
         MyOS.Clear()
         TaskOptions = Task.GetConfigFromUser()
         TaskOptions['LogFile'] = Task.GetLogName()
         RecoveryTypeMenu.Print()
-        for case in com.switch(TextMenu.GetInputNonEmpty('Recovery Type []: ').lower()):
+        for case in com.switch(TextMenu.GetInputNonEmpty('Recovery Type').lower()):
             print("\n\n") # padd down a few lines then print selected options.
-            if case('1'):
-                print("Full: {}".format(Task._RecoveryCMDbuilder_("full")))
+
+            if case('1'): # Full recovery
+                RecOption = "full"
                 InvalidResponse = False
                 break
             if case('2'): # No Scrape
-                print("No Scrap: {}".format(Task._RecoveryCMDbuilder_("noscrape")))
+                RecOption = "noscrape"
                 InvalidResponse = False
                 break
             if case('3'): # No trim
-                print("No Trim: {}".format(Task._RecoveryCMDbuilder_("notrim")))
+                RecOption = "notrim"
                 InvalidResponse = False
                 break
             if case('4'): # Single forward copy (large block size) good drive clone
-                print("Clone: {}".format(Task._RecoveryCMDbuilder_("clone")))
+                RecOption = "clone"
                 InvalidResponse = False
                 break
             if case('r'):# Restarts the Recovery Setup
@@ -96,6 +98,8 @@ def StartRescueTask():
                 InvalidResponse = False
                 break
     time.sleep(DELAY)
+    # And call the recovery
+    Task.Start(RecOption)
 
 def main():
     """Main program entry point"""
