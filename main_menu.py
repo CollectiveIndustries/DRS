@@ -64,34 +64,38 @@ def ForkRecovery(): ## Refactor This ##
 
 def StartRescueTask():
     """Starts a rescue task"""
-    MyOS.Clear()
     Task = Recovery()
-    TaskOptions = Task.GetConfigFromUser()
-    TaskOptions['LogFile'] = Task.GetLogName()
-    RecoveryTypeMenu.Print()
-
-    for case in com.switch(input('Recovery Type []: ').lower()):
-        print("\n\n") # padd down a few lines then print selected options.
-        if case('1'):
-            print("Full: {}".format(Task._RecoveryCMDbuilder_("full")))
-            break
-        if case('2'): # No Scrape
-            print("No Scrap: {}".format(Task._RecoveryCMDbuilder_("noscrape")))
-            break
-        if case('3'): # No trim
-            print("No Trim: {}".format(Task._RecoveryCMDbuilder_("notrim")))
-            break
-        if case('4'): # Single forward copy (large block size) good drive clone
-            print("Clone: {}".format(Task._RecoveryCMDbuilder_("clone")))
-            break
-        if case('r'):# Restarts the Recovery Setup
-            break
-        if case('b'):
-            print("Back to main Menu")
-            break
-        if case(): # default
-            print("Please make a valid selection.")
-
+    InvalidResponse = True
+    while True and InvalidResponse:
+        MyOS.Clear()
+        TaskOptions = Task.GetConfigFromUser()
+        TaskOptions['LogFile'] = Task.GetLogName()
+        RecoveryTypeMenu.Print()
+        for case in com.switch(TextMenu.GetInputNonEmpty('Recovery Type []: ').lower()):
+            print("\n\n") # padd down a few lines then print selected options.
+            if case('1'):
+                print("Full: {}".format(Task._RecoveryCMDbuilder_("full")))
+                InvalidResponse = False
+                break
+            if case('2'): # No Scrape
+                print("No Scrap: {}".format(Task._RecoveryCMDbuilder_("noscrape")))
+                InvalidResponse = False
+                break
+            if case('3'): # No trim
+                print("No Trim: {}".format(Task._RecoveryCMDbuilder_("notrim")))
+                InvalidResponse = False
+                break
+            if case('4'): # Single forward copy (large block size) good drive clone
+                print("Clone: {}".format(Task._RecoveryCMDbuilder_("clone")))
+                InvalidResponse = False
+                break
+            if case('r'):# Restarts the Recovery Setup
+                break
+            if case('b'):
+                print("Back to main Menu")
+                InvalidResponse = False
+                break
+    time.sleep(DELAY)
 
 def main():
     """Main program entry point"""

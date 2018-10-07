@@ -115,6 +115,7 @@ class Recovery(object):
         self._SettingsTable_.clear_rows() # clean out the table and rebuild a new one with current settings
         for name, value in _newConf_.items():
             self._SettingsTable_.add_row([name,value])
+        self._SettingsTable_.sortby = self._SettingsTable_.field_names[0]
         print(self._SettingsTable_)
 
     def GetLogName(self):
