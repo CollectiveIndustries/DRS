@@ -92,7 +92,8 @@ def BLKRecovery(ops=[], blkdevin='', blkdevout='', mapFile=''):
     cmdLst.append(mapFile)
     print(cmdLst)
     rescue = Popen(cmdLst, stderr=PIPE)
-
+    out, err = rescue.communicate()
+    print("ERROR: ",err)
 
 class Recovery(object):
     """Defines a Recovery Task Object"""

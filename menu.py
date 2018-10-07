@@ -42,7 +42,8 @@ class TextMenu(object):
     def GetDefaults(prompt, defval):
         """Gets data from user providing a defualt option"""
         formatstr = "{}{}:{} [ {} ] " # Header color prompt with defualt in [ ]
-        if input(formatstr.format(com.color.HEADER,prompt, com.color.END, defval)) == "":
+        response = input(formatstr.format(com.color.HEADER,prompt, com.color.END, defval))
+        if response == "":
             return defval
         else:
             return response
