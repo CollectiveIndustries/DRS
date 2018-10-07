@@ -31,9 +31,6 @@ RescueMount = ['mount', '-o', 'username=root,password=cw8400,nocase', '//nas/dat
 # file system repair after the clone or rescue we need to reset bad blocks and journal files.
 NtfsFix = ['ntfsfix', '--clear-bad-sectors', '--clean-dirty']
 
-# Make Directory Path just incase it doesnt exist
-MkDir = ['mkdir','-p']
-
 def lsblk():
     global debug
 
@@ -58,6 +55,36 @@ def lsblk():
     else: # LSBLK is unsupported on windows use the JSON test data from the Kali Linux VM instead
         decoded = _loadJsonDump_()
     return decoded
+
+def ReadableSize(fstat):
+    """Convert file size to MB, KB or Bytes"""
+    if (fstat.st_size > 1024 * 1024):
+        fsize = math.ceil(fstat.st_size / (1024 * 1024))
+        unit = "MB"
+    elif (fstat.st_size > 1024):
+        fsize = math.ceil(fstat.st_size / 1024)
+        unit = "KB"
+    else:
+        fsize = fstat.st_size
+        unit = "B"
+    return fsize, unit
+
+def RecoverDirTree(oldPath, newPath):
+    """Grab directory tree from startpath"""
+    for (root,dirs,files) in os.walk(oldPath):
+        MkPath = '{}'.format(root.replace(oldPath,newPath,1))
+        pathlib.Path(MkPath).mkdir(parents=True, exist_ok=True) # Create Target DIR
+
+        for f in files: # for each file in old path ddrescue to newpath
+            OldFile = '{}/{}'.format(root,f)
+            NewFile = '{}/{}'.format(root.replace(oldPath,newPath,1),f)
+            fsize, unit = ReadableSize(os.stat(os.path.join(root,f)))
+            
+            # Print file attributes
+            print('{:20s}{:8d} {:2s}'.format(f,fsize,unit))
+
+            # TODO call DDRescue
+            print("ddrescue OPTIONS {} {} MAPFILE".format(OldFile,NewFile))
 
 class Recovery(object):
     """Defines a Recovery Task Object"""
@@ -190,5 +217,5 @@ class Recovery(object):
                 _PrtDriveParam("Serial: ", block['serial'], com.color.BOLD)
                 print("") # add a blank line at the end of each group as some values may not print
                 if not DefVal:
-                    self._config_['RecoveryDisk'] = '/dev/{}'.format(block['name'])
+                    self._config_['RecoveryDisk'] = '/dev/{}'.format(block['name']) # set the default recovery drive to the first one found.
                     DefVal = True
