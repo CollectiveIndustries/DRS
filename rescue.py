@@ -93,7 +93,7 @@ def BLKRecovery(ops=[], blkdevin='', blkdevout='', mapFile=''):
     print(cmdLst)
     rescue = Popen(cmdLst, stderr=PIPE)
     out, err = rescue.communicate()
-    print("ERROR: ",err)
+    print("ERROR: ", err)
     input("Press return/enter to continue...")
 
 class Recovery(object):
