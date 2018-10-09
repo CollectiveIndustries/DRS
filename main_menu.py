@@ -6,6 +6,7 @@ import test
 from lib import com
 from menu import TextMenu
 from rescue import Recovery
+import fddrescue as fddr
 
 ## Functions
 def colorPrint(txt,colorStart):
@@ -63,34 +64,42 @@ def ForkRecovery(): ## Refactor This ##
 
 def StartRescueTask():
     """Starts a rescue task"""
-    MyOS.Clear()
     Task = Recovery()
-    TaskOptions = Task.GetConfigFromUser()
-    TaskOptions['LogFile'] = Task.GetLogName()
-    RecoveryTypeMenu.Print()
+    InvalidResponse = True
+    RecOption = ""
+    while True and InvalidResponse:
+        MyOS.Clear()
+        TaskOptions = Task.GetConfigFromUser()
+        TaskOptions['LogFile'] = Task.GetLogName()
+        RecoveryTypeMenu.Print()
+        for case in com.switch(TextMenu.GetInputNonEmpty('Recovery Type').lower()):
+            print("\n\n") # padd down a few lines then print selected options.
 
-    for case in com.switch(input('Recovery Type []: ').lower()):
-        print("\n\n") # padd down a few lines then print selected options.
-        if case('1'):
-            print("Full: {}".format(Task._RecoveryCMDbuilder_("full")))
-            break
-        if case('2'): # No Scrape
-            print("No Scrap: {}".format(Task._RecoveryCMDbuilder_("noscrape")))
-            break
-        if case('3'): # No trim
-            print("No Trim: {}".format(Task._RecoveryCMDbuilder_("notrim")))
-            break
-        if case('4'): # Single forward copy (large block size) good drive clone
-            print("Clone: {}".format(Task._RecoveryCMDbuilder_("clone")))
-            break
-        if case('r'):# Restarts the Recovery Setup
-            break
-        if case('b'):
-            print("Back to main Menu")
-            break
-        if case(): # default
-            print("Please make a valid selection.")
-
+            if case('1'): # Full recovery
+                RecOption = "full"
+                InvalidResponse = False
+                break
+            if case('2'): # No Scrape
+                RecOption = "noscrape"
+                InvalidResponse = False
+                break
+            if case('3'): # No trim
+                RecOption = "notrim"
+                InvalidResponse = False
+                break
+            if case('4'): # Single forward copy (large block size) good drive clone
+                RecOption = "clone"
+                InvalidResponse = False
+                break
+            if case('r'):# Restarts the Recovery Setup
+                break
+            if case('b'):
+                print("Back to main Menu")
+                InvalidResponse = False
+                break
+    time.sleep(DELAY)
+    # And call the recovery
+    Task.Start(RecOption)
 
 def main():
     """Main program entry point"""
@@ -98,16 +107,13 @@ def main():
         MyOS.Clear()
         colorPrint("Diagnostic and Recovery Programs",com.color.HEADER)
         print("OS Detected: {}".format(MyOS.FormatName()))
-    
+
         MainMenu.Print()
         for case in com.switch(input("Select: ").lower()):
-            if case("f"):
-                print(prime_factors(int(input("Get Primes for: "))))
-                time.sleep(DELAY*2)
             if case("t"):
                 print("Running Test module")
                 time.sleep(DELAY)
-                RecoverDirTree("/mnt/d/Nvidia Videos","/mnt/d/NEWPATH")
+                fddr.RecoverDirTree("/var/log","/mnt/d/NEWPATH")
                 sys.exit()
                 break
             if case("1"):
@@ -139,47 +145,6 @@ def main():
                 time.sleep(DELAY)
                 MyOS.Reboot()
                 break
-
-def prime_factors(n):
-    """Returns Prime factors for :input: n"""
-    i = 2
-    factors = []
-    while i * i <= n:
-        if n % i:
-            i += 1
-        else:
-            n //= i
-            factors.append(i)
-    if n > 1:
-        factors.append(n)
-    return factors
-
-def RecoverDirTree(oldPath,newPath):
-    """Grab directory tree from startpath"""
-    #Traverse directory tree
-    for (root,dirs,files) in os.walk(oldPath):
-        print('{}{}/{}'.format(com.color.OKBLUE, root, com.color.END))
-        print('{}{}/{}'.format(com.color.WARNING, root.replace(oldPath,newPath,1), com.color.END))
-
-        #Repeat for each file in directory
-        for f in files:
-            fstat = os.stat(os.path.join(root,f))
-            print('{}{}{}'.format(com.color.OKGREEN, f, com.color.END))
-        # Convert file size to MB, KB or Bytes
-            if (fstat.st_size > 1024 * 1024):
-                fsize = math.ceil(fstat.st_size / (1024 * 1024))
-                unit = "MB"
-            elif (fstat.st_size > 1024):
-                fsize = math.ceil(fstat.st_size / 1024)
-                unit = "KB"
-            else:
-                fsize = fstat.st_size
-                unit = "B"
-
-            mtime = time.strftime("%X %x", time.gmtime(fstat.st_mtime))
-        
-             # Print file attributes
-            print('\t{:15.15s}{:8d} {:2s} {:18s}'.format(f,fsize,unit,mtime))
 
 # start program here
 if __name__ == "__main__":

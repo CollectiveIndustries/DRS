@@ -37,8 +37,16 @@ mkdir -p kali-config/common/includes.chroot/usr/share/icons/cw/
 #mkdir -p kali-config/common/includes.chroot/root/Desktop
 #mkdir -p kali-config/common/includes.chroot/opt/
 
-# Copy GpuTest to Live Build
-#cp /opt/GpuTest kali-config/common/includes.chroot/opt/
+# Copy files from local repository into live FileSystem
+cp -v ../DRS/Fddrescue/sync.py kali-config/common/includes.chroot/opt/cw/backup/sync.py
+cp -v ../DRS/Fddrescue/rescue.py kali-config/common/includes.chroot/opt/cw/rescue/rescue.py
+cp -v ../DRS/Fddrescue/shared/*.py kali-config/common/includes.chroot/opt/cw/shared/
+
+# Grab network hosted configuration settings
+umount -l /media/cw # Lazy un mount
+mount -t cifs //192.168.0.241/cw -o username=root,password=cw8400 /media/cw
+cp -v /media/cw/Drew/Live_USB/scripts/rsync_exclude.conf kali-config/common/includes.chroot/etc/rsync_exclude.conf
+umount -l /media/cw
 
 # BUG Copy all the desktop Icons onto Live image
 #cp ~/Desktop/* kali-config/common/includes.chroot/root/Desktop/
@@ -52,7 +60,7 @@ cp $ICON_CACHE/* kali-config/common/includes.chroot/usr/share/icons/cw/
 #FAVORITES=$(dconf read /org/gnome/shell/favorite-apps)
 echo "Setting up favorites bar with $FAVORITES"
 # We add a chroot hook and set up the wallpaper
-# BUG: this isnt actualy setting any of the user customizaions durring the image process.
+# BUG: This isnt actualy setting any of the user customizaions durring the image process.
 # still broken >..<
 echo building files..........
 
@@ -176,15 +184,17 @@ cat <<EOF > kali-config/common/includes.chroot/etc/rc.local
 #!/bin/bash
 
 # Make the mount paths
+mkdir -p /media/cw
+mkdir -p /media/tech
 mkdir -p /media/data
 
 # Get ethernet online
 #ifup eth0
 
 # Mount CW NAS shares providing username/password and mount points durring boot
-#mount.cifs //nas/data -o username=root,password=cw8400 /media/data
-#mount.cifs //nas/tech -o username=root,password=cw8400 /media/tech
-#mount.cifs //nas/cw   -o username=root,password=cw8400 /media/cw
+mount -t cifs //192.168.0.241/data -o username=root,password=cw8400 /media/data
+mount -t cifs //192.168.0.241/tech -o username=root,password=cw8400 /media/tech
+mount -t cifs //192.168.0.241/cw   -o username=root,password=cw8400 /media/cw
 EOF
 
 chmod a+x kali-config/common/includes.chroot/etc/rc.local

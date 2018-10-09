@@ -1,6 +1,6 @@
 # Python script to set variables and call ddrescue.
 
-import os, sys, shlex, time
+import os, sys, shlex, time, json
 from jproc import JSONProcess
 from subprocess import STDOUT,  PIPE, Popen, check_output, CalledProcessError
 from datetime import date
@@ -16,17 +16,85 @@ _lsblkDataFile_ = "lsblkDump.json"
 if MyOS._type_ == "win32":
     debug = True
 
-# Mount options for the CIFS server share
-RescueMount = ['mount', '-o', 'username=root,password=cw8400,nocase', '//nas/data','/media/data']
+## Helper Methods
+def _PrtDriveParam(head='', pstr=None, color=''):
+    """Format input and print header with option"""
+    if pstr is not None:
+        pstr = "{}{}{}".format(color,pstr,com.color.END) # force string color normal again just incase
+        print("{}{} {}{}".format(com.color.HEADER,head,com.color.END,pstr))
+    else:
+        print("{}{}: None".format(com.color.HEADER,head,com.color.END))
 
-# Block listing with json format so we can parse the device list
-block_list = ['lsblk', '--json', '--noheadings', '--nodeps', '-o', 'name,size,model,serial,fstype']
+# Mount options for the CIFS server share
+RescueMount = ['mount', '-o', 'username=root,password=cw8400,nocase', '//nas/data', '/media/data']
 
 # file system repair after the clone or rescue we need to reset bad blocks and journal files.
 NtfsFix = ['ntfsfix', '--clear-bad-sectors', '--clean-dirty']
 
-# Make Directory Path just incase it doesnt exist
-MkDir = ['mkdir','-p']
+def lsblk():
+    global debug
+
+    if not debug:
+        # Block listing with json format so we can parse the device list
+        block_list = ['lsblk', '--json', '--noheadings', '--nodeps', '-o', 'name,size,model,serial,fstype']
+        try:
+            lsblk = Popen(block_list, stdout=PIPE, stderr=PIPE)
+            out, err = lsblk.communicate()
+        except OSError as _e_:
+            print("{}Returned with Error:\n>>>>{}\n>>>>{}\n{}".format(com.color.FAIL,_e_.errno,_e_.strerror,com.color.END))
+    
+        try:
+            decoded = json.loads(out.decode())
+        except (ValueError, KeyError, TypeError) as e: # LSBLK is also not in the Linux Subshell for Windows
+            print("[{}FAIL{}] lsblk returned the wrong JSON format".format(com.color.FAIL,com.color.END))
+            print("{}Returned with:\n>>>{}{}".format(com.color.FAIL,out,com.color.END))
+            print(str(e)) # the JSON object must be str, not 'bytes'
+            print("Using json dump instead!! {}WARNING{} Falling back in debug mode.".format(com.color.WARNING,com.color.END))
+            #decoded = self._loadJsonDump_()
+            debug = True
+    else: # LSBLK is unsupported on windows use the JSON test data from the Kali Linux VM instead
+        decoded = _loadJsonDump_()
+    return decoded
+
+def ReadableSize(fstat):
+    """Convert file size to MB, KB or Bytes"""
+    if (fstat.st_size > 1024 * 1024):
+        fsize = math.ceil(fstat.st_size / (1024 * 1024))
+        unit = "MB"
+    elif (fstat.st_size > 1024):
+        fsize = math.ceil(fstat.st_size / 1024)
+        unit = "KB"
+    else:
+        fsize = fstat.st_size
+        unit = "B"
+    return fsize, unit
+
+def RecoverDirTree(oldPath, newPath, RecoveryOps):
+    """Grab directory tree from startpath."""
+    for (root,dirs,files) in os.walk(oldPath):
+        MkPath = '{}'.format(root.replace(oldPath,newPath,1))
+        pathlib.Path(MkPath).mkdir(parents=True, exist_ok=True) # Create Target DIR
+
+        for f in files: # for each file in old path ddrescue to newpath
+            OldFile = '{}/{}'.format(root,f)
+            NewFile = '{}/{}'.format(root.replace(oldPath,newPath,1),f)
+            fsize, unit = ReadableSize(os.stat(os.path.join(root,f)))
+
+            # TODO call DDRescue
+            print("{}\t--->\t{}\t{:8d} {:2s}".format(OldFile,NewFile,fsize,unit))
+            BLKRecovery(RecoveryOps,OldFile,NewFile)
+
+def BLKRecovery(ops=[], blkdevin='', blkdevout='', mapFile=''):
+    """Calls ddrescue with the current configuration"""
+    cmdLst = ["ddrescue"] + ops
+    cmdLst.append(blkdevin)
+    cmdLst.append(blkdevout)
+    cmdLst.append(mapFile)
+    print(cmdLst)
+    rescue = Popen(cmdLst, stderr=PIPE)
+    out, err = rescue.communicate()
+    print("ERROR: ", err)
+    input("Press return/enter to continue...")
 
 class Recovery(object):
     """Defines a Recovery Task Object"""
@@ -53,13 +121,17 @@ class Recovery(object):
                          'CustomerFirstName':None,
                          'CustomerLastName':None,
                          'TechInitials':None,
-                         'RecoveryDisk':'/dev/sda',
+                         'RecoveryDisk':None, # program gets first block device in list as default
                          'TargetDisk':None,
-                         'LogPath':'/log/',
+                         'LogPath':'/var/log',
                          'LogFile':''
                         }
+    def Start(self,recType):
+        """Start the recovery with the current object settings."""
+        mapFile = "{}/{}".format(self._config_['LogPath'],self.GetLogName())
+        BLKRecovery(self.GetOps(recType),self._config_['RecoveryDisk'],self._config_['TargetDisk'],mapFile)
 
-    def _RecoveryCMDbuilder_(self,type='full'):
+    def GetOps(self,recType='full'):
         """Returns recovery options based on type.
         full, noscrape, notrim, clone
         """
@@ -71,29 +143,20 @@ class Recovery(object):
         skipSize = self._config_['skip-size']
         copyPass = self._config_['cpass']
 
-        for o in self._recoveryType_[type]:
+        for o in self._recoveryType_[recType]:
             optLst += [frmtStrSrt.format(o)]
 
-        if type == 'clone':
+        if recType == 'clone':
             return [frmtStrLng.format("cluster-size",clusterSize),frmtStrLng.format("cpass","1")] + optLst
         else:
             return [frmtStrLng.format("cluster-size",clusterSize), frmtStrLng.format("skip-size",skipSize),frmtStrLng.format("cpass",copyPass) ] + optLst
-
-    def NasMount(): # Needs refactoring Might be moved to a NAS Storage handler
-        try:
-            print("Mounting Storage Server....")
-            err = check_output(RescueMount)
-            print(com.color.OKGREEN+"Server Drive Mounted."+com.color.END)
-            time.sleep(10)
-        except CalledProcessError as ERROR:
-            print(com.color.FAIL+"ERROR while mounting "+RescueMount[3]+'\nReturned with Error:\n>>>> '+str(ERROR)+com.color.END)
-            exit(ERROR.returncode)
 
     def _DisplayConfigChanges_(self,_newConf_={}):
         """Prints out a side by side view of the configuration settings"""
         self._SettingsTable_.clear_rows() # clean out the table and rebuild a new one with current settings
         for name, value in _newConf_.items():
             self._SettingsTable_.add_row([name,value])
+        self._SettingsTable_.sortby = self._SettingsTable_.field_names[0]
         print(self._SettingsTable_)
 
     def GetLogName(self):
@@ -142,15 +205,7 @@ class Recovery(object):
         """Gets value by name"""
         return self._config_[name]
 
-    def DoRecovery(self):
-        """Calls ddrescue with the current configuration"""
-        try:
-            rescue = Popen([],  stderr=PIPE)
-        except:
-            print("Error trying to call rescue")
-
     # TODO 1 EXCEPTION on json import, refactor and move to jproc module
-
 
     def _GetDevices_(self): # TODO 0 needs refactoring, this is part of Issue #1
         """Get devices from lsblk
@@ -160,31 +215,14 @@ class Recovery(object):
         _FSignore_ = ['iso9660', 'squashfs']
 
         # Load data from provider
-        if not debug:
-            try:
-                lsblk = Popen(block_list, stdout=PIPE, stderr=PIPE)
-                out, err = lsblk.communicate()
-            except OSError as _e_:
-                print("{}Returned with Error:\n>>>>{}\n>>>>{}\n{}".format(com.color.FAIL,_e_.errno,_e_.strerror,com.color.END))
-
-            try:
-                json.loads(myResponse.content.decode(chardet.detect(myResponse.content)["encoding"]))
-                decoded = json.loads(out)
-            except (ValueError, KeyError, TypeError) as e: # LSBLK is also not in the Linux Subshell for Windows
-                print("[{}FAIL{}] lsblk returned the wrong JSON format".format(com.color.FAIL,com.color.END))
-                print("{}Returned with:\n>>>{}{}".format(com.color.FAIL,out,com.color.END))
-                print(str(e)) # the JSON object must be str, not 'bytes'
-                print("Using json dump instead!! {}WARNING{} Falling back in debug mode.".format(com.color.WARNING,com.color.END))
-                decoded = self._loadJsonDump_()
-        else: # LSBLK is unsupported on windows use the JSON test data from the Kali Linux VM instead
-            decoded = self._loadJsonDump_()
-            
-        for x in decoded['blockdevices']:
-            if x['fstype'] not in _FSignore_: # Make sure we list only valid drives and are NOT in the Ignore list
-                print(com.color.HEADER+"Drive:  "+com.color.OKGREEN+"/dev/"+x['name']+com.color.END)
-                print(com.color.HEADER+"Size:   "+com.color.WARNING+x['size']+com.color.END)
-            if x['model'] is not None:
-                print(com.color.HEADER+"Model:  "+com.color.END+x['model'])
-            if x['serial'] is not None:
-                print(com.color.HEADER+"Serial: "+com.color.END+x['serial'])
+        BlckDev = lsblk()
+        DefVal = False
+        for block in BlckDev['blockdevices']:
+            if block['fstype'] not in _FSignore_: # Make sure we list only valid drives and are NOT in the Ignore list
+                _PrtDriveParam("Drive:  ", block['name'],   com.color.OKGREEN)
+                _PrtDriveParam("Size:   ", block['size'],   com.color.WARNING)
+                _PrtDriveParam("Serial: ", block['serial'], com.color.BOLD)
                 print("") # add a blank line at the end of each group as some values may not print
+                if not DefVal:
+                    self._config_['RecoveryDisk'] = '/dev/{}'.format(block['name']) # set the default recovery drive to the first one found.
+                    DefVal = True
