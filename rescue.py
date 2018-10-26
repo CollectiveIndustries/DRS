@@ -198,7 +198,7 @@ class Recovery(object):
         """Gets data from user to define recovery environment"""
         UserOptions = self._userqa_()
         while not TextMenu.Confirm("Configuration Changed"):
-             self._userqa_()
+             UserOptions = self._userqa_()
         return UserOptions
 
     def _GetConfig(self,name):
