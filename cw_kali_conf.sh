@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Set Common Config variables here
-DESKTOP_WALLPAPER=
-USB_SPLASH=
+DESKTOP_WALLPAPER=~/Pictures/CollectiveIndustries.png
+USB_BOOT_SPLASH=
 ICON_CACHE=
 Opt_Dir=/opt/
 
@@ -28,6 +28,8 @@ cd live-build-config || exit
 
 # make the directory paths for the live build
 mkdir -p kali-config/common/includes.chroot/usr/share/wallpapers/kali/contents/images/
+mkdir -p kali-config/common/includes.chroot/usr/share/images/desktop-base/
+
 mkdir -p kali-config/common/includes.chroot/etc/apt/apt.conf.d/
 mkdir -p kali-config/common/includes.chroot/etc/xdg/autostart/
 #mkdir -p kali-config/common/includes.chroot/usr/share/icons/cw/
@@ -36,6 +38,7 @@ mkdir -p kali-config/common/includes.chroot/opt/frds/lib
 # Copy files from local repository into live FileSystem
 cp -v ../DRS/{main_menu.py,menu.py,rescue.py,fddrescue.py,jproc.py,requirements.txt} kali-config/common/includes.chroot/opt/frds/
 cp -v -r ../DRS/lib/* kali-config/common/includes.chroot/opt/frds/lib/
+cp -v $DESKTOP_WALLPAPER kali-config/common/includes.chroot/usr/share/images/desktop-base/desktop-grub.png
 
 # Grab network hosted configuration settings
 #umount -l /media/cw # Lazy un mount
@@ -111,7 +114,6 @@ alias rescue='python3 /opt/frds/main_menu.py'
 
 # Setup diff color by defualt
 alias diff='diff --color=always'
-
 EOF
 
 # Case insensitive Regular Expression matching for Windows names >..<
@@ -142,7 +144,6 @@ Exec=/usr/bin/gsmartcontrol
 Terminal=false
 Type=Application
 X-GNOME-Autostart-enabled=true
-
 EOF
 
 # Sludgehammer tactic Pull the entire .config directory from current system and drop it into the Live Image
@@ -157,4 +158,4 @@ chmod 755 kali-config/common/hooks/gnome.chroot
 # Run the build
 ./build.sh --distribution kali-rolling --verbose
 
-mv -v images/kali-linux-rolling-amd64.iso $FileShare/kali-linux-rolling-amd64.iso
+mv -v images/kali-linux-rolling-amd64.iso $FileShare/kali-linux-rolling-CI-amd64.iso
