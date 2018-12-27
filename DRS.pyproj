@@ -20,6 +20,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Content Include=".gitignore" />
+    <Content Include="cw_kali_conf.sh" />
     <Content Include="lsblkDump.json" />
     <Content Include="README.md" />
     <Content Include="reginfo.txt" />
