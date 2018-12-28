@@ -29,7 +29,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="fddrescue.py" />
-    <Compile Include="Fddrescue\fddrescue.py" />
+    <None Include="Fddrescue\fddrescue.py" />
     <Compile Include="jproc.py">
       <SubType>Code</SubType>
     </Compile>
@@ -44,8 +44,8 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="rescue.py" />
-    <Compile Include="Fddrescue\sync.py" />
-    <Compile Include="Fddrescue\test.py" />
+    <None Include="Fddrescue\sync.py" />
+    <None Include="Fddrescue\test.py" />
     <Compile Include="lib\com.py" />
     <Compile Include="lib\config.py" />
     <Compile Include="lib\dbcon.py" />
