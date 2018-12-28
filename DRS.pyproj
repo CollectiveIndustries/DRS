@@ -25,6 +25,7 @@
     <Content Include="README.md" />
     <Content Include="reginfo.txt" />
     <Content Include="requirements.txt" />
+    <Content Include="RemoteBuild.sh" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="fddrescue.py" />
