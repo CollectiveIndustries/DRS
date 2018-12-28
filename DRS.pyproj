@@ -21,6 +21,7 @@
   <ItemGroup>
     <Content Include=".gitignore" />
     <Content Include="cw_kali_conf.sh" />
+    <SplashScreen Include="desktop-background.xml" />
     <Content Include="lsblkDump.json" />
     <Content Include="README.md" />
     <Content Include="reginfo.txt" />

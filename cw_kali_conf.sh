@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Set Common Config variables here
-DESKTOP_WALLPAPER=~/Pictures/CollectiveIndustries.png
+DESKTOP_WALLPAPER=~/Pictures/*
 USB_BOOT_SPLASH=
 ICON_CACHE=
 Opt_Dir=/opt/
@@ -28,7 +28,7 @@ cd live-build-config || exit
 
 # make the directory paths for the live build
 mkdir -p kali-config/common/includes.chroot/usr/share/wallpapers/kali/contents/images/
-mkdir -p kali-config/common/includes.chroot/usr/share/images/desktop-base/
+mkdir -p kali-config/common/includes.chroot/usr/share/desktop-base/kali-theme/wallpaper/contents/images/
 
 mkdir -p kali-config/common/includes.chroot/etc/apt/apt.conf.d/
 mkdir -p kali-config/common/includes.chroot/etc/xdg/autostart/
@@ -38,7 +38,8 @@ mkdir -p kali-config/common/includes.chroot/opt/frds/lib
 # Copy files from local repository into live FileSystem
 cp -v ../DRS/{main_menu.py,menu.py,rescue.py,fddrescue.py,jproc.py,requirements.txt} kali-config/common/includes.chroot/opt/frds/
 cp -v -r ../DRS/lib/* kali-config/common/includes.chroot/opt/frds/lib/
-cp -v $DESKTOP_WALLPAPER kali-config/common/includes.chroot/usr/share/images/desktop-base/desktop-grub.png
+cp -v -r $DESKTOP_WALLPAPER kali-config/common/includes.chroot/usr/share/desktop-base/kali-theme/wallpaper/contents/images/
+cp -v ../DRS/desktop-background.xml /usr/share/images/desktop-base/desktop-background.xml
 
 # Grab network hosted configuration settings
 #umount -l /media/cw # Lazy un mount
@@ -135,17 +136,27 @@ Aquire::CompressionTypes::Order::"gz";
 EOF
 
 # XDG Autostart desktop applications
-cat <<EOF > kali-config/common/includes.chroot/etc/xdg/autostart/Gsmart.desktop
-[Desktop Entry]
-Name=GSmart
-GenericName=Hdd Diagnostics
-Comment=Auto start the Gsmart Control HDD Diagnostics system on start
-Exec=/usr/bin/gsmartcontrol
-Terminal=false
-Type=Application
-X-GNOME-Autostart-enabled=true
-EOF
+#cat <<EOF > kali-config/common/includes.chroot/etc/xdg/autostart/Gsmart.desktop
+#[Desktop Entry]
+#Name=GSmart
+#GenericName=Hdd Diagnostics
+#Comment=Auto start the Gsmart Control HDD Diagnostics system on start
+#Exec=/usr/bin/gsmartcontrol
+#Terminal=false
+#Type=Application
+#X-GNOME-Autostart-enabled=true
+#EOF
 
+
+cat <<EOF > kali-config/common/includes.chroot/etc/xdg/autostart/fords.desktop
+[Desktop Entry]
+Name=frds
+GenericName=File Recovery and Diagnostics Suite
+Comment=Start Fords Menu on system startup
+Exec='python3 /opt/frds/main_menu.py'
+Terminal=true
+Type=Application
+EOF
 # Sludgehammer tactic Pull the entire .config directory from current system and drop it into the Live Image
 # BUG: chroot hooks dont seem to be excecuted properly so were cloning the entire working environment
 echo rebuilding profiles
