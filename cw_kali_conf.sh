@@ -39,7 +39,7 @@ mkdir -p kali-config/common/includes.chroot/opt/frds/lib
 cp -v ../DRS/{main_menu.py,menu.py,rescue.py,fddrescue.py,jproc.py,requirements.txt} kali-config/common/includes.chroot/opt/frds/
 cp -v -r ../DRS/lib/* kali-config/common/includes.chroot/opt/frds/lib/
 cp -v -r $DESKTOP_WALLPAPER kali-config/common/includes.chroot/usr/share/desktop-base/kali-theme/wallpaper/contents/images/
-cp -v ../DRS/desktop-background.xml /usr/share/images/desktop-base/desktop-background.xml
+cp -v ../DRS/desktop-background.xml kali-config/common/includes.chroot/usr/share/images/desktop-base/desktop-background.xml
 
 # Grab network hosted configuration settings
 #umount -l /media/cw # Lazy un mount
