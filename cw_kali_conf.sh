@@ -161,6 +161,15 @@ EOF
 # BUG: chroot hooks dont seem to be excecuted properly so were cloning the entire working environment
 echo rebuilding profiles
 
+cat > config/hooks/gnome.chroot<< EOF
+#!/bin/bash
+dbus-launch --exit-with-session gsettings set org.gnone.terminal.profile:/org/mate/terminal/profiles/default/ background-darkness 0.86
+dbus-launch --exit-with-session gsettings set org.gnome.terminal.profile:/org/mate/terminal/profiles/default/ background-type 'transparent'
+dbus-launch --exit-with-session gsettings set org.gnome.terminal.profile:/org/mate/terminal/profiles/default/ background-color '#FFFFFFFFDDDD'
+dbus-launch --exit-with-session gsettings set org.gnome.terminal.profile:/org/mate/terminal/profiles/default/ scrollback-unlimited true
+cp -rf /root/.config /etc/skel/
+EOF
+
 #cp -rf ~/.config kali-config/common/includes.chroot/root/
 
 echo changing permissions
