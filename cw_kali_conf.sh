@@ -22,7 +22,7 @@ apt-get install live-build git cdebootstrap -y
 
 cd .. || exit
 
-git clone git://git.kali.org/live-build-config.git
+git clone https://gitlab.com/kalilinux/build-scripts/live-build-config.git
 
 # change to the working directory so we can run the base distro config scripts
 cd live-build-config || exit
