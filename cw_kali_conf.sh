@@ -1,5 +1,7 @@
 #!/bin/bash
 
+#TODO: Clean Comments up O_e !!!!
+
 # Set Common Config variables here
 DESKTOP_WALLPAPER=~/Pictures/*
 USB_BOOT_SPLASH=
@@ -16,9 +18,8 @@ apt-get autoclean --force-yes -y
 apt-get autoremove --force-yes -y
 apt-get update
 apt-get install live-build git cdebootstrap -y
-apt-get dist-upgrade -y
+# apt-get dist-upgrade -y #TODO: Lets not upgrade the build server automatically when building a live Boot Image >.<
 
-# use the proxy tunnel or regular git clone place the resulting repository in the Home SOURCE Directory.
 cd .. || exit
 
 git clone git://git.kali.org/live-build-config.git
@@ -104,7 +105,7 @@ alias wget='wget -c'
 # Setup defualts for Rsync
 # --prune-empty-dirs
 # the /etc/rsync_exclude.conf should be built sepratly
-# --no-OPTION will turn off the permissions, groups, and owner so we can do a straight copy to an NTFS based file system with not issues
+# --no-OPTION will turn off the permissions, groups, and owner so we can do a straight copy to an NTFS based file system with no issues
 alias rsync='rsync --partial --progress --times --recursive --compress --human-readable --verbose --no-perms --no-group --no-owner --no-times --exclude-from "/etc/rsync_exclude.conf"'
 
 # Show Devices currently attached to system. Set some defualt values to display
@@ -179,3 +180,7 @@ chmod 755 kali-config/common/hooks/gnome.chroot
 ./build.sh --distribution kali-rolling --verbose
 
 mv -v images/kali-linux-rolling-amd64.iso $FileShare/kali-linux-rolling-CI-amd64.iso
+
+# Run a checksum on the iso and stash it.
+# Remote system can pull the hash and run against local copy to see if upgrade is needed.
+sha256sum --binary $FileShare/kali-linux-rolling-CI-amd64.iso > $FileShare/Manifest.sha

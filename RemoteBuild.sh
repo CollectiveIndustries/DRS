@@ -12,3 +12,5 @@ rm -v kali-linux-rolling-CI-amd64.iso
 ssh $DEVUser@$DEVTermIP -p $DEVTermSSHPort 'service apache2 start; cd ~/repos/DRS; git pull; bash cw_kali_conf.sh'
 
 wget http://$DEVTermIP/kali-linux-rolling-CI-amd64.iso
+
+#TODO Add unpacking and copy for TFTP server location.
