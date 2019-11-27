@@ -88,6 +88,10 @@ lm-sensors
 
 # Windows Networking compatibility
 cifs-utils
+
+# Data Destruction tools
+wipe
+
 EOF
 
 # Setup some aliases to add defualt options or short commands here
