@@ -65,7 +65,10 @@ echo building files..........
 
 # Set up custom packages here for building the ISO
 cat <<EOF > kali-config/variant-gnome/package-lists/cw.list.chroot
-# Tools used by Computer Wherehouse
+# Tools I commonly Use
+
+# Midnight Commander
+mc
 
 # Forensics tools
 gddrescue
