@@ -23,6 +23,7 @@
     <Content Include="cw_kali_conf.sh" />
     <SplashScreen Include="desktop-background.xml" />
     <Content Include="lsblkDump.json" />
+    <Content Include="PXE Server Installer\StartConfig.sh" />
     <Content Include="README.md" />
     <Content Include="reginfo.txt" />
     <Content Include="requirements.txt" />
@@ -56,6 +57,7 @@
   <ItemGroup>
     <Folder Include="Fddrescue" />
     <Folder Include="lib" />
+    <Folder Include="PXE Server Installer\" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
 </Project>
