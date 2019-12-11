@@ -67,6 +67,9 @@ echo building files..........
 cat <<EOF > kali-config/variant-gnome/package-lists/cw.list.chroot
 # Tools I commonly Use
 
+# RAID
+mdadm
+
 # Midnight Commander
 mc
 
