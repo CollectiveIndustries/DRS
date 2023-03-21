@@ -1,4 +1,4 @@
-pip==18.1
+pip==21.1
 prettytable==0.7.2
 setuptools==65.5.1
 astroid==2.1.0.dev0
